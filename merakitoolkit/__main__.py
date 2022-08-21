@@ -19,19 +19,8 @@ def main() -> int:
     mainparser,return_code = parser()
     if mainparser:
         if mainparser.command == "psk":
-            merakiobj = merakitoolkit.MerakiToolkit(
-                apikey=mainparser.apikey,
-                verbose=mainparser.verbose
-                )
-            merakiobj.get_organizations()
-            merakiobj.pskchange(
-                mainparser.organization,
-                mainparser.network,
-                mainparser.tags,
-                mainparser.ssid,
-                mainparser.passhprase,
-                mainparser.dryrun
-            )
+            merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
+            merakiobj.pskchange()
     return return_code
 
 if __name__ == "__main__":

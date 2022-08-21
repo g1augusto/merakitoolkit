@@ -74,6 +74,23 @@ def parser():
                         default="./templates/psk/default/",
                         help="template folder for email, valid only if --email is set",
                         action="store") # can be used only if --email is set
+    psksubparser.add_argument("--smtp-server",
+                        help="specify a mailserver server",
+                        action="store")
+    psksubparser.add_argument("--smtp-port",
+                        help="specify a mailserver server port",
+                        action="store")
+    psksubparser.add_argument("--smtp-mode",
+                        help="specify connection mode to the mailserver [TLS|STARTTLS] default=TLS ",
+                        choices=["TLS","STARTTLS"],
+                        default="TLS",
+                        action="store")
+    psksubparser.add_argument("--smtp-user",
+                        help="specify an username for SMTP connection",
+                        action="store")
+    psksubparser.add_argument("--smtp-pass",
+                        help="specify a password for SMTP connection",
+                        action="store")
     pskrequirednamed = psksubparser.add_argument_group('required arguments')
     pskrequirednamed.add_argument("-o",
                                "--organization",

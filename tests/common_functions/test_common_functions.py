@@ -1,7 +1,6 @@
 '''tests common functionalities for merakitoolkit'''
 import merakitoolkitparser # pylint: disable=import-error
 import merakitoolkit # pylint: disable=import-error
-import __main__ as program
 
 def test_import_success():
     '''Verify that merakitoolkit can be imported successfully'''
@@ -56,7 +55,13 @@ def test_parser_psk_all_params(monkeypatch):
     "--email","email1@domain.com","email2@domain.com",
     "-t","tag1","tag2",
     "--dryrun",
-    "--verbose"
+    "--verbose",
+    "-et","./testtemplate",
+    "--smtp-server","smtp.test.net",
+    "--smtp-port","111",
+    "--smtp-mode","STARTTLS",
+    "--smtp-user","user-smtp",
+    "--smtp-pass","pass-smtp"
     ])
     args,return_code = merakitoolkitparser.parser()
     assert args is not None
@@ -77,4 +82,10 @@ def test_parser_psk_all_params(monkeypatch):
     assert args.ssid == "SSID"
     assert isinstance(args.ssid,str)
     assert args.verbose is True
+    assert args.emailtemplate == "./testtemplate"
+    assert args.smtp_server == "smtp.test.net"
+    assert args.smtp_port == "111"
+    assert args.smtp_mode == "STARTTLS"
+    assert args.smtp_user == "user-smtp"
+    assert args.smtp_pass == "pass-smtp"
     assert return_code == 0
