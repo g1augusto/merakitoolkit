@@ -27,11 +27,29 @@ __version__ = "1.0.0"
 
 class MerakiToolkit():
     '''Defines the base class with all functionalities'''
-    def __init__(self,apikey=None,verbose=False):
-        self.verbose = verbose
-        self.organizations = None
-        self.apikey = apikey
-        self._last_operation = None
+    def __init__(self,settings):
+        '''
+        apikey
+        command
+        tags
+        verbose
+        dryrun
+        passphrase
+        email
+        emailtemplate
+        organization
+        network
+        ssid
+        smtp-server
+        smtp-port
+        smtp-mode
+        smtp-user
+        smtp-pass
+        '''
+        # Meraki API key is common for all operations and is assigned via the property method
+        self.apikey = settings["apikey"]
+        # operation data received in input
+        self.current_operation = settings
         self.connect()
 
 
@@ -57,6 +75,40 @@ class MerakiToolkit():
             print("An error occurred while loading Meraki API key: ",err)
             sys.exit(2)
 
+    @property
+    def current_operation(self):
+        if hasattr(self,"_current_operation"):
+            return self._current_operation
+        else:
+            return None
+
+    @current_operation.setter
+    def current_operation(self,settings):
+        if hasattr(self,"_last_operation"):
+            self._last_operation = self.current_operation.copy()
+        else:
+            self._last_operation = None
+        self._current_operation = {
+            "settings": {x: settings[x] for x in settings if x not in ["apikey"] },
+            "success": False
+        }
+         # verify that at least one parameter for smtp is empty
+        if None in ([ settings[x] for x in settings if "smtp" in x ]):
+            # verify that the MERAKITK_SMTP environment variable exists and loads it
+            if "MERAKITK_SMTP" in os.environ.keys():
+                smtp_settings = os.environ["MERAKITK_SMTP"].split(":")
+                # if a parameter was passed in input, retain it otherwise use the environment var
+                if settings["smtp_server"] is None:
+                    self._current_operation["settings"]["smtp_server"]=smtp_settings[0]
+                if settings["smtp_port"] is None:
+                    self._current_operation["settings"]["smtp_port"]=smtp_settings[1]
+                if settings["smtp_mode"] is None:
+                    self._current_operation["settings"]["smtp_mode"]=smtp_settings[2]
+                if settings["smtp_user"] is None:
+                    self._current_operation["settings"]["smtp_user"]=smtp_settings[3]
+                if settings["smtp_pass"] is None:
+                    self._current_operation["settings"]["smtp_pass"]=smtp_settings[4]
+
 
     def connect(self):
         '''
@@ -65,7 +117,7 @@ class MerakiToolkit():
         try:
             self.dashboard = meraki.DashboardAPI(
                 api_key=self.apikey,
-                suppress_logging=not self.verbose,
+                suppress_logging=not self.current_operation["settings"]["verbose"],
                 simulate=False,
                 caller="merakitoolkit"
                 )
@@ -76,34 +128,30 @@ class MerakiToolkit():
 
     def get_organizations(self):
         '''
-        Retrieve organizations from Meraki dashboard and store them in obj variable .organizations
+        Retrieve organizations from Meraki dashboard and return them
         '''
         try:
-            self.organizations = self.dashboard.organizations.getOrganizations()
+            organizations = self.dashboard.organizations.getOrganizations()
+            return organizations
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while retrieving Organizations: ",err)
             sys.exit(2)
 
 
-    def pskchange(
-        self,
-        in_organizations:list=None,
-        in_networks:list=None,
-        in_tags:list=None,
-        in_ssid:str=None,
-        in_psk:str=None,
-        dryrun:bool=False
-        ):
+    def pskchange(self):
         '''
         Change Pre Shared Key for an SSID in specified network name in organizations
         '''
+        settings = self.current_operation["settings"]
         try:
+            if settings is None:
+                raise ValueError("PSK change : No operation has been defined")
             # verify that mandatory attributes are present, otherwise raise a ValueError exception
-            if in_organizations is None:
+            if settings["organization"] is None:
                 raise ValueError("PSK change : Organization input list is empty")
-            if in_networks is None:
+            if settings["network"] is None:
                 raise ValueError("PSK change : Networks input list is empty")
-            if (in_psk is None) or (len(in_psk)<8):
+            if (settings["passphrase"] is None) or (len(settings["passphrase"])<8):
                 raise ValueError("PSK change : PSK input is empty or less than 8 characters")
 
             # network_to_process will contain the list of networks to apply the PSK change
@@ -113,18 +161,18 @@ class MerakiToolkit():
             data_has_changed = False
 
             # scan matching organizations -> networks -> ssid -> collect data
-            for organization in self.organizations:
+            for organization in self.get_organizations():
                 # Verify that the current organization is in the list of organizations to process
-                if organization["name"] in in_organizations:
+                if organization["name"] in settings["organization"]:
                     # Retrieve Networks for the current organization
                     networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"]) # pylint: disable=line-too-long
                     for network in networks:
                         # Verify that network name is a match, if not skip this cycle
-                        if (network["name"] not in in_networks) and ("ALL" not in in_networks):
+                        if (network["name"] not in settings["network"]) and ("ALL" not in settings["network"]):
                             continue
                         # verify that at least one of the TAGs is in the list of network tags
-                        if in_tags:
-                            if not any( tag in in_tags for tag in network["tags"]):
+                        if settings["tags"]:
+                            if not any( tag in settings["tags"] for tag in network["tags"]):
                                 continue
                         # retrieve SSIDs of the evaluated network
                         network_ssids = self.dashboard.wireless.getNetworkWirelessSsids(network["id"]) # pylint: disable=line-too-long
@@ -132,7 +180,7 @@ class MerakiToolkit():
                         if not network_ssids:
                             continue
                         for ssidposition in range(len(network_ssids)): # pylint: disable=consider-using-enumerate
-                            if in_ssid == network_ssids[ssidposition]["name"]: # SSID is found
+                            if settings["ssid"] == network_ssids[ssidposition]["name"]: # SSID is found
                                 # create dictionary to collect all necessary information
                                 network_to_process = {}
                                 network_to_process["organization"] = organization["name"]
@@ -145,14 +193,14 @@ class MerakiToolkit():
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while running PSK change: ",err)
             sys.exit(2)
-        if dryrun:
+        if settings["dryrun"]:
             for network in networks_to_process:
-                print(f"| Org:{network['organization']:^20}| Network: {network['name']:^30}| SSID:{network['ssidName']:^20}| PSK:{in_psk:^15}|") # pylint: disable=line-too-long
+                print(f"| Org:{network['organization']:^20}| Network: {network['name']:^30}| SSID:{network['ssidName']:^20}| PSK:{settings['passphrase']:^15}|") # pylint: disable=line-too-long
             data_has_changed = True
         else:
             for network in networks_to_process:
                 try:
-                    self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=in_psk) # pylint: disable=line-too-long
+                    self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=settings["passphrase"]) # pylint: disable=line-too-long
                 except TypeError as err:
                     print("An error occurred while running PSK change: ",err)
                 except Exception as err: # pylint: disable=broad-except
@@ -161,13 +209,8 @@ class MerakiToolkit():
 
         # save last operation data only if a change (real or simulated) happened
         if data_has_changed:
-            self._last_operation = {
-                "type":"pskchange",
-                "networks":networks_to_process,
-                "ssid":in_ssid,
-                "psk":in_psk,
-                "dryrun":dryrun
-            }
+            self.current_operation["networks"] = networks_to_process
+            self.current_operation["success"] = True
 
 
     def send_email_psk(
@@ -188,15 +231,7 @@ class MerakiToolkit():
 
         context = ssl.create_default_context()
 
-        if smtp_server is None:
-            if "MERAKITK_SMTP" in os.environ.keys():
-                smtp_settings = os.environ["MERAKITK_SMTP"].split(":")
-                smtp_server=smtp_settings[0]
-                smtp_port=smtp_settings[1]
-                smtp_mode=smtp_settings[2]
-                if credentials is None and (len(smtp_settings) >4):
-                    credentials["user"] = smtp_settings[3]
-                    credentials["password"] = smtp_settings[4]
+
 
 
         if smtp_mode == "TLS":
@@ -218,7 +253,7 @@ class MerakiToolkit():
         # Create the root MIME message
         msg_root = MIMEMultipart("related")
         msg_root['From']=sender
-        msg_root['Bcc']=",".join(recipient) # for multiple email recipients 
+        msg_root['Bcc']=",".join(recipient) # for multiple email recipients
         msg_root['Subject']=self._last_operation["ssid"] + " PSK changed " + date.today().strftime("%d/%m/%Y")
         msg_root.preamble = 'This is a multi-part message in MIME format.'
 

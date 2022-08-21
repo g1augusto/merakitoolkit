@@ -65,19 +65,30 @@ def test_pskchg_org_one_net_one_dryrun_no(mock_meraki_dashboard): # pylint: disa
     networks : one
     dryrun : no
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox"],
-    "in_networks":["DNSMB3-gxxxxxxonscom.com"],
-    "in_tags":None,
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["DNSMB3-gxxxxxxonscom.com"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
     merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
 
 
 
@@ -88,20 +99,31 @@ def test_pskchg_org_one_net_one_dryrun_yes(mock_meraki_dashboard): # pylint: dis
     networks : one
     dryrun : yes
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox"],
-    "in_networks":["DNSMB3-gxxxxxxonscom.com"],
-    "in_tags":None,
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":True
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': True,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["DNSMB3-gxxxxxxonscom.com"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == "testtest" # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == "testtest" # pylint: disable=line-too-long
+
 
 def test_pskchg_org_one_net_two_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
@@ -110,20 +132,30 @@ def test_pskchg_org_one_net_two_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
     networks : two
     dryrun : no
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox"],
-    "in_networks":["DNSMB3-gxxxxxxonscom.com", "DevNet Sandbox ALWAYS ON"],
-    "in_tags":None,
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["DNSMB3-gxxxxxxonscom.com", "DevNet Sandbox ALWAYS ON"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
 
 def test_pskchg_org_one_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
@@ -133,21 +165,31 @@ def test_pskchg_org_one_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
     dryrun : no
     tags : no
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox"],
-    "in_networks":["ALL"],
-    "in_tags":None,
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["ALL"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
 
 def test_pskchg_org_one_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
@@ -157,21 +199,32 @@ def test_pskchg_org_one_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pyl
     dryrun : no
     tags : two
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox"],
-    "in_networks":["ALL"],
-    "in_tags":["tag3","tag4"],
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': ["tag3","tag4"],
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["ALL"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest" # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
 
 def test_pskchg_org_two_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
@@ -181,23 +234,33 @@ def test_pskchg_org_two_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
     dryrun : no
     tags : no
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox","Test Organization"],
-    "in_networks":["ALL"],
-    "in_tags":None,
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ["DevNet Sandbox","Test Organization"],
+        'network': ["ALL"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
 
 def test_pskchg_org_two_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
@@ -207,22 +270,32 @@ def test_pskchg_org_two_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pyl
     dryrun : no
     tags : two
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox","Test Organization"],
-    "in_networks":["ALL"],
-    "in_tags":["tag3","tagA"],
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': ["tag3","tagA"],
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ["DevNet Sandbox","Test Organization"],
+        'network': ["ALL"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest" # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == "testtest" # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == "testtest" # pylint: disable=line-too-long
 
 def test_pskchg_org_two_net_two_dryrun_no_tags_one(mock_meraki_dashboard): # pylint: disable=unused-argument
@@ -233,20 +306,30 @@ def test_pskchg_org_two_net_two_dryrun_no_tags_one(mock_meraki_dashboard): # pyl
     dryrun : no
     tags : two
     '''
-    kwargs = {
-    "in_organizations":["DevNet Sandbox","Test Organization"],
-    "in_networks":["DNSMB3-gxxxxxxonscom.com","DNSMB3-gxxxxxxoascom.com"],
-    "in_tags":["tag1"],
-    "in_ssid":"Test SSID1",
-    "in_psk":"psk12345",
-    "dryrun":False
-    }
 
-    merakiobj = merakitoolkit.MerakiToolkit(apikey="123456789")
-    merakiobj.get_organizations()
-    merakiobj.pskchange(**kwargs)
-    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    settings= {
+        'apikey': '123456789',
+        'tags': ["tag1"],
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': "psk12345",
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ["DevNet Sandbox","Test Organization"],
+        'network': ["DNSMB3-gxxxxxxonscom.com","DNSMB3-gxxxxxxoascom.com"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest" # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == "testtest" # pylint: disable=line-too-long
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == "testtest" # pylint: disable=line-too-long
-    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == kwargs["in_psk"] # pylint: disable=line-too-long
+    assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == settings["passphrase"] # pylint: disable=line-too-long
