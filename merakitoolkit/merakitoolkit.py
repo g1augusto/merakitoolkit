@@ -212,7 +212,7 @@ class MerakiToolkit():
             self.current_operation["networks"] = networks_to_process
             self.current_operation["success"] = True
 
-
+    # refactor email send method
     def send_email_psk(
         self,
         recipient:list,
