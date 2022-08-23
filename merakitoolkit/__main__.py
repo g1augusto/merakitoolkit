@@ -21,6 +21,7 @@ def main() -> int:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
             merakiobj.pskchange()
+            merakiobj.send_email_psk()
     return return_code
 
 if __name__ == "__main__":

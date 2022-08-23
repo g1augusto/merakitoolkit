@@ -77,6 +77,7 @@ class MerakiToolkit():
 
     @property
     def current_operation(self):
+        '''Getter for the current operatino data'''
         if hasattr(self,"_current_operation"):
             return self._current_operation
         else:
@@ -95,7 +96,7 @@ class MerakiToolkit():
          # verify that at least one parameter for smtp is empty
         if None in ([ settings[x] for x in settings if "smtp" in x ]):
             # verify that the MERAKITK_SMTP environment variable exists and loads it
-            if "MERAKITK_SMTP" in os.environ.keys():
+            if "MERAKITK_SMTP" in os.environ:
                 smtp_settings = os.environ["MERAKITK_SMTP"].split(":")
                 # if a parameter was passed in input, retain it otherwise use the environment var
                 if settings["smtp_server"] is None:
@@ -165,7 +166,7 @@ class MerakiToolkit():
                 # Verify that the current organization is in the list of organizations to process
                 if organization["name"] in settings["organization"]:
                     # Retrieve Networks for the current organization
-                    networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"]) # pylint: disable=line-too-long
+                    networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"])
                     for network in networks:
                         # Verify that network name is a match, if not skip this cycle
                         if (network["name"] not in settings["network"]) and ("ALL" not in settings["network"]):
@@ -193,83 +194,115 @@ class MerakiToolkit():
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while running PSK change: ",err)
             sys.exit(2)
+
+        # Execution code : at this point data is being changed (or simulated) on Meraki Cloud
+        # NOTE : this portion could be extracted into a standalone executor method for multiple tasks
         if settings["dryrun"]:
             for network in networks_to_process:
                 print(f"| Org:{network['organization']:^20}| Network: {network['name']:^30}| SSID:{network['ssidName']:^20}| PSK:{settings['passphrase']:^15}|") # pylint: disable=line-too-long
-            data_has_changed = True
+                data_has_changed = True
         else:
             for network in networks_to_process:
                 try:
                     self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=settings["passphrase"]) # pylint: disable=line-too-long
+                    data_has_changed = True
                 except TypeError as err:
                     print("An error occurred while running PSK change: ",err)
                 except Exception as err: # pylint: disable=broad-except
                     print("operation: ",err.operation," error: ",err.message["errors"]," network: ",network["name"]," SSID: ",network["ssidName"]) # pylint: disable=line-too-long disable=no-member
-            data_has_changed = True
+
 
         # save last operation data only if a change (real or simulated) happened
         if data_has_changed:
-            self.current_operation["networks"] = networks_to_process
+            self.current_operation["networks_to_process"] = networks_to_process
             self.current_operation["success"] = True
 
     # refactor email send method
-    def send_email_psk(
-        self,
-        recipient:list,
-        path:str,
-        smtp_server:str=None,
-        smtp_port:int=None,
-        smtp_mode:str=None,
-        sender:str="merakitoolkit",
-        credentials:dict=None,
-        ):
+    def send_email_psk(self):
         ''' send email for PSK change notification'''
 
-        if self._last_operation is not None:
+        if not self.current_operation["success"]:
             print("No Network changes -> Email discarded")
             return False
 
-        context = ssl.create_default_context()
-
-
-
-
-        if smtp_mode == "TLS":
-            try:
-                with smtplib.SMTP_SSL(smtp_server,smtp_port,context=context) as server:
-                    if credentials:
-                        server.login(**credentials)
-            except Exception as err:
-                print("An error occurred while opening the SMTP connection: ",err)
-        if smtp_mode == "STARTTLS":
-            try:
-                server = smtplib.SMTP(host=smtp_server, port=smtp_port)
-                server.starttls()
-                if credentials:
-                    server.login(**credentials)
-            except Exception as err:
-                print("An error occurred while opening the SMTP connection: ",err)
+        settings = self.current_operation["settings"]
 
         # Create the root MIME message
         msg_root = MIMEMultipart("related")
-        msg_root['From']=sender
-        msg_root['Bcc']=",".join(recipient) # for multiple email recipients
-        msg_root['Subject']=self._last_operation["ssid"] + " PSK changed " + date.today().strftime("%d/%m/%Y")
+        msg_root['From']=settings["smtp_sender"]
+        msg_root['Bcc']=",".join(settings["email"]) # for multiple email recipients
+        msg_root['Subject']=settings["ssid"] + " PSK changed " + date.today().strftime("%d/%m/%Y")
         msg_root.preamble = 'This is a multi-part message in MIME format.'
 
-        data = {
-            "ssid":self._last_operation["ssid"],
-            "psk":self._last_operation["psk"],
-            "logo":"logo.png",
-            "qrcode":"QRcode.png",
-        }
         # Attach text message part
         msg_alternative = MIMEMultipart("alternative")
         msg_root.attach(msg_alternative)
-        msg_plaintext = merakitoolkitemail.generate_email_body("templatetxt.j2",path,data)
-        msg_alternative.attach(msg_plaintext)
-        # Send email
-        try:
-            server.send_message(msg_root)
-        except Exception as err:
-            print("An error occurred while sending the email: ",err)
+        msg_text = merakitoolkitemail.generate_email_body(
+            "templatetxt.j2",
+            settings["emailtemplate"],
+            settings["ssid"],
+            settings["passphrase"]
+            )
+        msg_text_mime = MIMEText(msg_text,"plain")
+        msg_alternative.attach(msg_text_mime)
+
+        # Generate QR Code image to distribute in the email
+        merakitoolkitemail.generate_qrcode(settings["ssid"],settings["passphrase"],settings["emailtemplate"])
+
+        # Gather the list of images filenames
+        imagelist = [x for x in os.listdir(settings["emailtemplate"]) if x.lower().endswith(("png","bmp","jpg","gif"))]
+        # generate the same list but with filenames without dots, to be used in jinja2 template
+        imagelistj2 = [x.replace(".","") for x in imagelist]
+
+        # image will be a tuple with the real filename from imagelist and the dot-stripped version from imagelistj2
+        for image in zip(imagelist,imagelistj2):
+            # Open each image in the template folder and encode it in base64 to attach to the email
+            try:
+                with open(f'{settings["emailtemplate"]}/{image[0]}', 'rb') as imagefile:
+                    # set attachment mime and file name, the image type is png
+                    mime = MIMEBase('image', image[0][-3:], filename=image[0])
+                    # add required header data:
+                    mime.add_header('Content-Disposition', 'attachment', filename=image[0])
+                    mime.add_header('X-Attachment-Id', image[0])
+                    mime.add_header('Content-ID', f'<{image[1]}>')
+                    # read attachment file content into the MIMEBase object
+                    mime.set_payload(imagefile.read())
+                    # encode with base64
+                    encoders.encode_base64(mime)
+                    # add MIMEBase object to MIMEMultipart object
+                    msg_root.attach(mime)
+            except Exception as err: # pylint: disable=broad-except
+                print("An error occurred while opening the logo image: ",err)
+
+        msg_html = merakitoolkitemail.generate_email_body(
+            "templatehtml.j2",
+            settings["emailtemplate"],
+            settings["ssid"],
+            settings["passphrase"],
+            imagelistj2
+            )
+        msg_html_mime = MIMEText(msg_html,"html")
+        msg_alternative.attach(msg_html_mime)
+
+        context = ssl.create_default_context()
+
+        if settings["smtp_mode"] == "TLS":
+            try:
+                with smtplib.SMTP_SSL(settings["smtp_server"],settings["smtp_port"],context=context) as server:
+                    if settings["smtp_user"] and settings["smtp_pass"]:
+                        server.login(user=settings["smtp_user"],password=settings["smtp_pass"])
+                    server.send_message(msg_root)
+            except Exception as err: # pylint: disable=broad-except
+                print("An error occurred while opening the SMTP connection: ",err)
+        if settings["smtp_mode"] in ["STARTTLS","SMTP"]:
+            try:
+                server = smtplib.SMTP(host=settings["smtp_server"], port=settings["smtp_port"])
+                # apply TLS encryption only if STARTTLS is selected
+                if settings["smtp_mode"] == "STARTTLS":
+                    server.starttls()
+                # login to server only if credentials are provided
+                if settings["smtp_user"] and settings["smtp_pass"]:
+                    server.login(user=settings["smtp_user"],password=settings["smtp_pass"])
+                server.send_message(msg_root)
+            except Exception as err: # pylint: disable=broad-except
+                print("An error occurred while opening the SMTP connection: ",err)

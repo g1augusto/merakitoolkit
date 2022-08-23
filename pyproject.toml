@@ -2,3 +2,6 @@
 pythonpath = [
   "./merakitoolkit" ,"."
 ]
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 130

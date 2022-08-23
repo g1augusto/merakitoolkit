@@ -71,9 +71,13 @@ def parser():
                         action="store")
     psksubparser.add_argument("-et",
                         "--emailtemplate",
-                        default="./templates/psk/default/",
+                        default="./merakitoolkit/templates/psk/default/",
                         help="template folder for email, valid only if --email is set",
                         action="store") # can be used only if --email is set
+    psksubparser.add_argument("--smtp-sender",
+                        help="specify a sender for the email delivery",
+                        default="MerakiToolkit",
+                        action="store")
     psksubparser.add_argument("--smtp-server",
                         help="specify a mailserver server",
                         action="store")
@@ -81,8 +85,8 @@ def parser():
                         help="specify a mailserver server port",
                         action="store")
     psksubparser.add_argument("--smtp-mode",
-                        help="specify connection mode to the mailserver [TLS|STARTTLS] default=TLS ",
-                        choices=["TLS","STARTTLS"],
+                        help="specify connection mode to the mailserver [TLS|STARTTLS|SMTP] default=TLS ",
+                        choices=["TLS","STARTTLS","SMTP"],
                         default="TLS",
                         action="store")
     psksubparser.add_argument("--smtp-user",
@@ -118,5 +122,8 @@ def parser():
         return_code = 1
     else:
         args = merakiparser.parse_args()
+        #verify that email template path is not missing the last forward slash
+        if args.emailtemplate[-1] != "/":
+            args.emailtemplate += "/"
         return_code = 0
     return args,return_code

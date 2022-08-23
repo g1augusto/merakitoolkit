@@ -2,3 +2,10 @@
 *__pycache__*
 .env
 *.log
+*qrcode.png
+*.bmp
+*.jpg
+*.gif
+*.png
+!logo.png
+!logotest.png

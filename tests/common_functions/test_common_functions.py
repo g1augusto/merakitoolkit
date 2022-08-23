@@ -61,7 +61,8 @@ def test_parser_psk_all_params(monkeypatch):
     "--smtp-port","111",
     "--smtp-mode","STARTTLS",
     "--smtp-user","user-smtp",
-    "--smtp-pass","pass-smtp"
+    "--smtp-pass","pass-smtp",
+    "--smtp-sender","MerakiTookit!"
     ])
     args,return_code = merakitoolkitparser.parser()
     assert args is not None
@@ -82,10 +83,11 @@ def test_parser_psk_all_params(monkeypatch):
     assert args.ssid == "SSID"
     assert isinstance(args.ssid,str)
     assert args.verbose is True
-    assert args.emailtemplate == "./testtemplate"
+    assert args.emailtemplate == "./testtemplate/"
     assert args.smtp_server == "smtp.test.net"
     assert args.smtp_port == "111"
     assert args.smtp_mode == "STARTTLS"
     assert args.smtp_user == "user-smtp"
     assert args.smtp_pass == "pass-smtp"
+    assert args.smtp_sender == "MerakiTookit!"
     assert return_code == 0
