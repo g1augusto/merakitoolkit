@@ -6,7 +6,8 @@ Email module for MerakiToolkit
 import jinja2
 import pyqrcode
 
-def generate_email_body(templatename,path,ssid,psk,images=[]):
+def generate_email_body(templatename,path,ssid,psk,images=None):
+    '''Generate email body from a jinja template <templatename>'''
     data = {
         "ssid":ssid,
         "psk":psk,
@@ -14,8 +15,9 @@ def generate_email_body(templatename,path,ssid,psk,images=[]):
 
     # Adds images to the dictionary to unpack in the jinja template
     # should be passed only for HTML email body
-    for image in images:
-        data[image] = image
+    if images:
+        for image in images:
+            data[image] = image
     environment = jinja2.Environment(loader=jinja2.FileSystemLoader(path))
     template = environment.get_template(templatename)
     content = template.render(**data)
