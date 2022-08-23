@@ -306,3 +306,10 @@ class MerakiToolkit():
                 server.send_message(msg_root)
             except Exception as err: # pylint: disable=broad-except
                 print("An error occurred while opening the SMTP connection: ",err)
+        
+        # Cleanup QR code files
+        try:
+            if os.path.exists(f"{settings['emailtemplate']}qrcode.png"):
+                os.remove(f"{settings['emailtemplate']}qrcode.png")
+        except Exception as err: # pylint: disable=broad-except
+            print("An error occurred while deleting QR code image files: ",err)        
