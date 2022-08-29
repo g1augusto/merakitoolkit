@@ -8,6 +8,7 @@ meraki = "*"
 pyqrcode = "*"
 jinja2 = "*"
 pypng = "*"
+xkcdpass = "*"
 
 [dev-packages]
 pylint = "*"
