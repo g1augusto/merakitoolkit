@@ -109,6 +109,13 @@ class MerakiToolkit():
                     self._current_operation["settings"]["smtp_user"]=smtp_settings[3]
                 if settings["smtp_pass"] is None:
                     self._current_operation["settings"]["smtp_pass"]=smtp_settings[4]
+        if settings["passphrase"] is None:
+            if "MERAKITK_PSK" in os.environ:
+                settings["passphrase"] = os.environ["MERAKITK_PSK"]
+            else:
+                # Generate a random password
+                pass
+        # Validate PSK security
 
 
     def connect(self):
@@ -306,10 +313,10 @@ class MerakiToolkit():
                 server.send_message(msg_root)
             except Exception as err: # pylint: disable=broad-except
                 print("An error occurred while opening the SMTP connection: ",err)
-        
+
         # Cleanup QR code files
         try:
             if os.path.exists(f"{settings['emailtemplate']}qrcode.png"):
                 os.remove(f"{settings['emailtemplate']}qrcode.png")
         except Exception as err: # pylint: disable=broad-except
-            print("An error occurred while deleting QR code image files: ",err)        
+            print("An error occurred while deleting QR code image files: ",err)

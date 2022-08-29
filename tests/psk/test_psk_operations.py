@@ -89,6 +89,37 @@ def test_pskchg_org_one_net_one_dryrun_no(mock_meraki_dashboard): # pylint: disa
     merakiobj.pskchange()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
 
+def test_pskchg_org_one_net_one_dryrun_no_psk_env(mock_meraki_dashboard): # pylint: disable=unused-argument
+    '''
+    test pskchange method with no organization
+    organizations : one
+    networks : one
+    dryrun : no
+    '''
+
+    settings= {
+        'apikey': '123456789',
+        'tags': None,
+        'verbose': False,
+        'dryrun': False,
+        'passphrase': None,
+        'email': ['email1@domain.com', 'email2@domain.com'],
+        'emailtemplate': './templates/psk/default/',
+        'smtp_server': None,
+        'smtp_port': None,
+        'smtp_mode': 'TLS',
+        'smtp_user': None,
+        'smtp_pass': None,
+        'organization': ['DevNet Sandbox'],
+        'network': ["DNSMB3-gxxxxxxonscom.com"],
+        "ssid":"Test SSID1",
+        "command":"psk",
+        }
+
+    merakiobj = merakitoolkit.MerakiToolkit(settings)
+    merakiobj.pskchange()
+    assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
+
 
 
 def test_pskchg_org_one_net_one_dryrun_yes(mock_meraki_dashboard): # pylint: disable=unused-argument
