@@ -61,7 +61,7 @@ def parser():
                         action="store_true")
     psksubparser.add_argument("-p",
                         "--passphrase",
-                        help="PSK, can be loaded from environment variable MERAKI_DASHBOARD_API_KEY",
+                        help="PSK, can be loaded from env MERAKITK_PSK",
                         type=str,
                         action="store")
     psksubparser.add_argument("-e",
@@ -79,7 +79,7 @@ def parser():
                         default="MerakiToolkit",
                         action="store")
     psksubparser.add_argument("--smtp-server",
-                        help="specify a mailserver server",
+                        help="specify a mailserver, or env MERAKITK_SMTP=<server>:<port>:<mode>:<user>:<pass>",
                         action="store")
     psksubparser.add_argument("--smtp-port",
                         help="specify a mailserver server port",
