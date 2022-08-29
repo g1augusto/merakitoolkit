@@ -17,7 +17,7 @@ from datetime import date
 
 # additional libraries
 import meraki
-import merakitoolkitemail
+import merakitoolkitsupport
 
 __author__ = "Giovanni Augusto"
 __copyright__ = "Copyright (C) 2022 Giovanni Augusto"
@@ -97,7 +97,7 @@ class MerakiToolkit():
         if None in ([ settings[x] for x in settings if "smtp" in x ]):
             # verify that the MERAKITK_SMTP environment variable exists and loads it
             if "MERAKITK_SMTP" in os.environ:
-                smtp_settings = os.environ["MERAKITK_SMTP"].split(":")
+                smtp_settings = os.environ["MERAKITK_SMTP"].split("::")
                 # if a parameter was passed in input, retain it otherwise use the environment var
                 if settings["smtp_server"] is None:
                     self._current_operation["settings"]["smtp_server"]=smtp_settings[0]
@@ -109,12 +109,21 @@ class MerakiToolkit():
                     self._current_operation["settings"]["smtp_user"]=smtp_settings[3]
                 if settings["smtp_pass"] is None:
                     self._current_operation["settings"]["smtp_pass"]=smtp_settings[4]
+
+        # Generate a PSK
+        # priority of PSK choice : input psk > MERAKI_PSK env > automatic generation
+        # randomization has effect only if a PSK was given in input otherwise is always applied
         if settings["passphrase"] is None:
             if "MERAKITK_PSK" in os.environ:
-                settings["passphrase"] = os.environ["MERAKITK_PSK"]
+                psk_dictionary = os.environ["MERAKITK_PSK"].split("::")
             else:
-                # Generate a random password
-                pass
+                psk_dictionary = [""]
+        else:
+            psk_dictionary = [settings["passphrase"]]
+        self._current_operation["settings"]["passphrase"] = merakitoolkitsupport.generate_psk(
+                                                                    psk_dictionary,
+                                                                    randomize=settings["passrandomize"]
+                                                                    )
         # Validate PSK security
 
 
@@ -244,7 +253,7 @@ class MerakiToolkit():
         # Attach text message part
         msg_alternative = MIMEMultipart("alternative")
         msg_root.attach(msg_alternative)
-        msg_text = merakitoolkitemail.generate_email_body(
+        msg_text = merakitoolkitsupport.generate_email_body(
             "templatetxt.j2",
             settings["emailtemplate"],
             settings["ssid"],
@@ -254,7 +263,7 @@ class MerakiToolkit():
         msg_alternative.attach(msg_text_mime)
 
         # Generate QR Code image to distribute in the email
-        merakitoolkitemail.generate_qrcode(settings["ssid"],settings["passphrase"],settings["emailtemplate"])
+        merakitoolkitsupport.generate_qrcode(settings["ssid"],settings["passphrase"],settings["emailtemplate"])
 
         # Gather the list of images filenames
         imagelist = [x for x in os.listdir(settings["emailtemplate"]) if x.lower().endswith(("png","bmp","jpg","gif"))]
@@ -281,7 +290,7 @@ class MerakiToolkit():
             except Exception as err: # pylint: disable=broad-except
                 print("An error occurred while opening the logo image: ",err)
 
-        msg_html = merakitoolkitemail.generate_email_body(
+        msg_html = merakitoolkitsupport.generate_email_body(
             "templatehtml.j2",
             settings["emailtemplate"],
             settings["ssid"],

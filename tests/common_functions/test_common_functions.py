@@ -39,6 +39,7 @@ def test_parser_psk_min_params(monkeypatch):
     assert return_code == 0
     assert args.tags is None
     assert args.passphrase is None
+    assert args.passrandomize is False
 
 def test_parser_psk_all_params(monkeypatch):
     '''
@@ -52,6 +53,7 @@ def test_parser_psk_all_params(monkeypatch):
     "--organization","Organization1","Organization2",
     "--network","Network1","Network2",
     "-s","SSID",
+    "-pr",
     "--email","email1@domain.com","email2@domain.com",
     "-t","tag1","tag2",
     "--dryrun",
@@ -90,4 +92,5 @@ def test_parser_psk_all_params(monkeypatch):
     assert args.smtp_user == "user-smtp"
     assert args.smtp_pass == "pass-smtp"
     assert args.smtp_sender == "MerakiTookit!"
+    assert args.passrandomize is True
     assert return_code == 0
