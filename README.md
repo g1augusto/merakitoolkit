@@ -99,6 +99,7 @@ merakitoolkit psk \
 | MERAKITK_SMTP   | SMTP server informations separated by double colon :: in the form: <br>**MERAKITK_SMTP=SMTP_SERVER::PORT::MODE::USERNAME::PASSWORD** |
 |MERAKITK_PSK| Passphrase or list of possible words.<br>When multiple passhprases are available, entropy is always added to the final PSK<br>**MERAKITK_PSK=your_password123**<br>or<br>**MERAKITK_PSK=pass1::pass2:pass3:pass4:pass5**
 
+<br><br>
 
 ## PSK Change email sample
 ------------------------------------------
@@ -111,3 +112,29 @@ Please make sure to update tests as appropriate.
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+
+## Third party libraries licenses and acknowledgements (THIRDPARTYLICENSES)
+```
+Apache-2.0
+        'aiohttp' by None ('https://github.com/aio-libs/aiohttp')
+        'aiosignal' by 'Nikolay Kim <fafhrd91@gmail.com>' ('https://github.com/aio-libs/aiosignal')
+        'async-timeout' by 'Andrew Svetlov <andrew.svetlov@gmail.com> <andrew.svetlov@gmail.com>' ('https://github.com/aio-libs/async-timeout')
+        'frozenlist' by None ('https://github.com/aio-libs/frozenlist')
+        'multidict' by 'Andrew Svetlov <andrew.svetlov@gmail.com>' ('https://github.com/aio-libs/multidict')
+        'requests' by 'Kenneth Reitz <me@kennethreitz.org>' ('https://requests.readthedocs.io')
+        'yarl' by 'Andrew Svetlov <andrew.svetlov@gmail.com>' ('https://github.com/aio-libs/yarl/')
+
+BSD-3-clause
+        'idna' by 'Kim Davies <kim@cynosure.com.au>' ('https://github.com/kjd/idna')
+        'xkcdpass' by 'Steven Tobin <steventtobin@gmail.com>' ('https://github.com/redacted/XKCD-password-generator')
+
+MIT
+        'attrs' by 'Hynek Schlawack <hs@ox.cx>' ('https://www.attrs.org/')
+        'charset-normalizer' by 'Ahmed TAHRI @Ousret <ahmed.tahri@cloudnursery.dev>' ('https://github.com/ousret/charset_normalizer')
+        'meraki' by 'Cisco Meraki <api-feedback@meraki.net>' ('https://github.com/meraki/dashboard-api-python')
+        'pypng' by 'David Jones <drj@pobox.com>' ('https://gitlab.com/drj11/pypng')
+        'urllib3' by 'Andrey Petrov <andrey.petrov@shazow.net>' ('https://urllib3.readthedocs.io/')
+
+MPL-2.0
+        'certifi' by 'Kenneth Reitz <me@kennethreitz.com>' ('https://github.com/certifi/python-certifi')
+```
