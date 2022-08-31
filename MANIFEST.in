@@ -1,0 +1,3 @@
+include docs/*
+include .env_sample
+include THIRDPARTYLICENSES

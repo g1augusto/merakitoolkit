@@ -1,3 +1,47 @@
+[project]
+name = "merakitoolkit"
+dynamic = ["version"]
+
+authors = [
+  { name="Giovanni Augusto", email="author@example.com" },
+]
+description = "merakitoolkit is a Python application to automate specific tasks with Meraki Cloud networks."
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Networking",
+]
+keywords = ["meraki", "wireless"]
+dependencies = [
+    "jinja2>=3.1.2",
+    "meraki>=1.24.0",
+    "pypng>=0.20220715.0",
+    "pyqrcode>=1.2.1",
+    "xkcdpass>=1.19.3",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "merakitoolkit/merakitoolkit.__version__"}
+
+[project.optional-dependencies]
+dev = [    
+    "pylint>=2.15.0",
+    "pytest>=7.1.2",
+    "third-party-license-file-generator>=2022.3.1",
+  ]
+
+[project.scripts]
+merakitoolkit = "merakitoolkit.__main__:main"
+
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [tool.pytest.ini_options]
 pythonpath = [
   "./merakitoolkit" ,"."

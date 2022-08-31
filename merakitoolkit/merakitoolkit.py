@@ -22,7 +22,7 @@ import merakitoolkitsupport
 __author__ = "Giovanni Augusto"
 __copyright__ = "Copyright (C) 2022 Giovanni Augusto"
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "0.1.1"
 
 
 class MerakiToolkit():

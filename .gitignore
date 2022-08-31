@@ -9,3 +9,5 @@
 *.png
 !logo.png
 !logotest.png
+merakitoolkit.egg-info/
+dist/

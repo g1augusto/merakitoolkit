@@ -8,7 +8,7 @@ main program executable
 import sys
 
 # additional libraries
-from merakitoolkitparser import parser
+from merakitoolkitparser import parser # pylint: disable=import-error
 import merakitoolkit
 
 def main() -> int:
