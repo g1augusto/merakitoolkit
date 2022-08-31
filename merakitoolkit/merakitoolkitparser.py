@@ -108,7 +108,7 @@ def parser():
     pskrequirednamed.add_argument("-o",
                                "--organization",
                                nargs="+",
-                               help="Specify an Organization",
+                               help="Specify one or more Organizations (ALL for all Organizations)",
                                required=True)
     pskrequirednamed.add_argument("-n",
                                "--network",

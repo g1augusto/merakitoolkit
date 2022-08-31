@@ -227,7 +227,7 @@ class MerakiToolkit():
             # scan matching organizations -> networks -> ssid -> collect data
             for organization in self.get_organizations():
                 # Verify that the current organization is in the list of organizations to process
-                if organization["name"] in settings["organization"]:
+                if organization["name"] in settings["organization"] or "ALL" in settings["organization"]:
                     # Retrieve Networks for the current organization
                     networks = self.get_organization_networks(organization)
                     for network in networks:
@@ -262,8 +262,10 @@ class MerakiToolkit():
         # Execution code : at this point data is being changed (or simulated) on Meraki Cloud
         # NOTE : this portion could be extracted into a standalone executor method for multiple tasks
         if settings["dryrun"]:
+            print(f'{"Organization":<25} {"Network:":<45} {"SSID:":<20} {"PSK:":<20}')
             for network in networks_to_process:
-                print(f"| Org:{network['organization']:^20}| Network: {network['name']:^30}| SSID:{network['ssidName']:^20}| PSK:{settings['passphrase']:^15}|") # pylint: disable=line-too-long
+                print("-"*100)
+                print(f"{network['organization']:<25} {network['name']:<45} {network['ssidName']:<20} {settings['passphrase']:<20}") # pylint: disable=line-too-long
                 data_has_changed = True
         else:
             for network in networks_to_process:
