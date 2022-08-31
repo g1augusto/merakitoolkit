@@ -1,3 +1,4 @@
 include docs/*
+include merakitoolkit/templates/*
 include .env_sample
 include THIRDPARTYLICENSES
