@@ -14,8 +14,6 @@ import merakitoolkit
 def main() -> int:
     '''merakitoolkit main program call'''
 
-    # ADD VALIDATION BEFORE PERFORMING OPERATIONS
-
     mainparser,return_code = parser()
     if mainparser:
         if mainparser.command == "psk":

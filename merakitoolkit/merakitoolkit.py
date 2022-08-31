@@ -138,6 +138,8 @@ class MerakiToolkit():
                 simulate=False,
                 caller="merakitoolkit"
                 )
+        except meraki.exceptions.APIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]}')
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while connecting to Meraki Dashboard: ",err)
             sys.exit(2)
@@ -152,6 +154,51 @@ class MerakiToolkit():
             return organizations
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while retrieving Organizations: ",err)
+            sys.exit(2)
+
+    def get_network_wireless_ssids(self,network):
+        '''
+        Retrieve SSIDs from a Network in Meraki dashboard and return them
+        '''
+        try:
+            ssids = self.dashboard.wireless.getNetworkWirelessSsids(network["id"])
+            return ssids
+        except meraki.exceptions.APIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
+            return None
+        except Exception as err: # pylint: disable=broad-except
+            print("An error occurred while retrieving Organizations: ",err)
+            sys.exit(2)
+
+    def get_organization_networks(self,organization):
+        '''
+        Retrieve Networks from an organization in Meraki dashboard and return them
+        '''
+        try:
+            networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"])
+            return networks
+        except meraki.exceptions.APIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} Organization: {organization["name"]}')
+            return None
+        except Exception as err: # pylint: disable=broad-except
+            print("An error occurred while retrieving Networks: ",err)
+            sys.exit(2)
+
+    def update_network_wireless_ssid(self,network,passphrase):
+        '''
+        update Wireless SSID in a network and return outcome of the operation
+        '''
+        try:
+            ssid = self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=passphrase)
+            if ssid["psk"] == passphrase:
+                return True
+            else:
+                raise ValueError(f"PSK change : {ssid['name']} passhprase was not changed!")
+        except meraki.exceptions.APIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} Network: {network["id"]} SSID: {network["ssidName"]}') # pylint: disable=line-too-long
+            return False
+        except Exception as err: # pylint: disable=broad-except
+            print("An error occurred while retrieving Networks: ",err)
             sys.exit(2)
 
 
@@ -182,7 +229,7 @@ class MerakiToolkit():
                 # Verify that the current organization is in the list of organizations to process
                 if organization["name"] in settings["organization"]:
                     # Retrieve Networks for the current organization
-                    networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"])
+                    networks = self.get_organization_networks(organization)
                     for network in networks:
                         # Verify that network name is a match, if not skip this cycle
                         if (network["name"] not in settings["network"]) and ("ALL" not in settings["network"]):
@@ -192,7 +239,7 @@ class MerakiToolkit():
                             if not any( tag in settings["tags"] for tag in network["tags"]):
                                 continue
                         # retrieve SSIDs of the evaluated network
-                        network_ssids = self.dashboard.wireless.getNetworkWirelessSsids(network["id"]) # pylint: disable=line-too-long
+                        network_ssids = self.get_network_wireless_ssids(network) # pylint: disable=line-too-long
                         # some networks has no SSIDs (camera,appliance,etc) so we skip those
                         if not network_ssids:
                             continue
@@ -205,6 +252,7 @@ class MerakiToolkit():
                                 network_to_process["id"] = network["id"]
                                 network_to_process["ssidPosition"] = str(ssidposition)
                                 network_to_process["ssidName"] = network_ssids[ssidposition]["name"]
+                                network_to_process["wpaEncryptionMode"] = network_ssids[ssidposition]["wpaEncryptionMode"]
                                 networks_to_process.append(network_to_process)
                                 break # SSID was found -> exit the loop
         except Exception as err: # pylint: disable=broad-except
@@ -219,14 +267,7 @@ class MerakiToolkit():
                 data_has_changed = True
         else:
             for network in networks_to_process:
-                try:
-                    self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=settings["passphrase"]) # pylint: disable=line-too-long
-                    data_has_changed = True
-                except TypeError as err:
-                    print("An error occurred while running PSK change: ",err)
-                except Exception as err: # pylint: disable=broad-except
-                    print("operation: ",err.operation," error: ",err.message["errors"]," network: ",network["name"]," SSID: ",network["ssidName"]) # pylint: disable=line-too-long disable=no-member
-
+                data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])
 
         # save last operation data only if a change (real or simulated) happened
         if data_has_changed:
@@ -271,6 +312,7 @@ class MerakiToolkit():
         imagelistj2 = [x.replace(".","") for x in imagelist]
 
         # image will be a tuple with the real filename from imagelist and the dot-stripped version from imagelistj2
+        # real filename will be used to attach the image file, dot-stripped name to create he reference ID in the email
         for image in zip(imagelist,imagelistj2):
             # Open each image in the template folder and encode it in base64 to attach to the email
             try:

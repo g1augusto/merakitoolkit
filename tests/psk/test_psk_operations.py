@@ -51,6 +51,7 @@ def fixture_mock_meraki_dashboard(monkeypatch):
     # mock update SSID data by updating ssid_data dictionary (to be used for assertions)
     def mock_updateNetworkWirelessSsid(obj,net_id,ssidPosition,psk): # pylint: disable=unused-argument disable=invalid-name
         ssid_data[net_id][int(ssidPosition)]["psk"] = psk
+        return ssid_data[net_id][int(ssidPosition)]
 
     # modify meraki methods to return mock data
     monkeypatch.setattr(meraki.Organizations,"getOrganizations",mock_getOrganizations)

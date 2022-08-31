@@ -1,4 +1,8 @@
-'''support functions for merakitoolkit parser'''
+"""
+merakitoolkit parser
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Define a parser function to process input parameters for MerakiToolkit
+"""
 
 # standard libraries
 import sys
