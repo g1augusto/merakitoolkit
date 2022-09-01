@@ -1,4 +1,4 @@
-include docs/*
-include merakitoolkit/templates/*
+recursive-include docs/*
+recursive-include merakitoolkit/templates/*
 include .env_sample
 include THIRDPARTYLICENSES

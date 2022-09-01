@@ -107,6 +107,8 @@ Is possible to customize the email content and change/add images, including the 
 QR code is automatically generated at each PSK change with the name *qrcode.png* and the related jinja2 variable is *qrcodepng*
 
 Each image included in the template folder chosen is attached to the email template and can be inserted by referring to its filename stripped of the dot:<br>logo.png -> logopng
+<br><br>
+Default template to customize can be downloaded from Github : https://github.com/g1augusto/merakitoolkit/tree/master/merakitoolkit/templates/psk/default
 
 ![email sample image](https://github.com/g1augusto/merakitoolkit/raw/master/docs/emailsample.png "email sample image")
 

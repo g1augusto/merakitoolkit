@@ -47,5 +47,8 @@ pythonpath = [
   "."
 ]
 
+[project.urls]
+Homepage = "https://github.com/g1augusto/merakitoolkit"
+
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 130
