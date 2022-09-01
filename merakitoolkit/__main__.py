@@ -22,7 +22,8 @@ def main() -> int:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
             merakiobj.pskchange()
-            merakiobj.send_email_psk()
+            if mainparser.email:
+                merakiobj.send_email_psk()
         if mainparser.command == "psktemplategen":
             # copy default template into local directory
             # create directory structure

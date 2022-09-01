@@ -1,4 +1,5 @@
 '''tests common functionalities for merakitoolkit'''
+import sys
 import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disable=import-error
 import merakitoolkit.merakitoolkit as merakitoolkit # pylint: disable=import-error
 
@@ -66,6 +67,10 @@ def test_parser_psk_all_params(monkeypatch):
     "--smtp-pass","pass-smtp",
     "--smtp-sender","MerakiTookit!"
     ])
+
+    # Modify sys.exit behavior to prevent test failure
+    monkeypatch.setattr(sys,"exit",print)
+
     args,return_code = merakitoolkitparser.parser()
     assert args is not None
     assert args.apikey == "123456789"
