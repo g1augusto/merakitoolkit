@@ -48,7 +48,7 @@ def main() -> int:
                     # try as a text file
                     with resources.open_text("merakitoolkit.templates.psk.default",resource) as source:
                         sourcedata = source.read()
-                        with open(templatepath+"/"+resource,"w") as destination:
+                        with open(templatepath+"/"+resource,"w",encoding="utf-8") as destination:
                             destination.write(sourcedata)
                 except UnicodeDecodeError:
                     # if an error occurs then it is a binary file
@@ -57,7 +57,6 @@ def main() -> int:
                         with open(templatepath+"/"+resource,"wb") as destination:
                             destination.write(sourcedata)
 
-            pass
     return return_code
 
 if __name__ == "__main__":
