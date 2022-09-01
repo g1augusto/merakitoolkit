@@ -103,6 +103,11 @@ merakitoolkit psk \
 
 ## PSK Change email sample
 ------------------------------------------
+Is possible to customize the email content and change/add images, including the logo.
+QR code is automatically generated at each PSK change with the name *qrcode.png* and the related jinja2 variable is *qrcodepng*
+
+Each image included in the template folder chosen is attached to the email template and can be inserted by referring to its filename stripped of the dot:<br>logo.png -> logopng
+
 ![email sample image](/docs/emailsample.png "email sample image")
 
 ## Contributing

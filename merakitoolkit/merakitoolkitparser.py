@@ -9,7 +9,7 @@ import sys
 
 # additional libraries
 import argparse
-from  merakitoolkit import __version__,__copyright__,__license__
+from  .merakitoolkit import __version__,__copyright__,__license__
 
 class MyParser(argparse.ArgumentParser):
     '''

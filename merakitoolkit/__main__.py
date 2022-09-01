@@ -8,13 +8,13 @@ main program executable
 import sys
 
 # additional libraries
-from merakitoolkitparser import parser # pylint: disable=import-error
-import merakitoolkit
+import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disable=import-error
+import merakitoolkit.merakitoolkit as merakitoolkit
 
 def main() -> int:
     '''merakitoolkit main program call'''
 
-    mainparser,return_code = parser()
+    mainparser,return_code = merakitoolkitparser.parser()
     if mainparser:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))

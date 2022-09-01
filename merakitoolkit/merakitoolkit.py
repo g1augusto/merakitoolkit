@@ -17,12 +17,12 @@ from datetime import date
 
 # additional libraries
 import meraki
-import merakitoolkitsupport
+from . import merakitoolkitsupport
 
 __author__ = "Giovanni Augusto"
 __copyright__ = "Copyright (C) 2022 Giovanni Augusto"
 __license__ = "MIT"
-__version__ = "0.1.1"
+__version__ = "0.1.3"
 
 
 class MerakiToolkit():

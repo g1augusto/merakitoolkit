@@ -4,7 +4,7 @@ import os
 import json
 import pytest
 import meraki
-import merakitoolkit # pylint: disable=import-error
+import merakitoolkit.merakitoolkit as merakitoolkit # pylint: disable=import-error
 
 # Assume that the correct Meraki API key is the following
 APIKEY_CORRECT = "123456789"

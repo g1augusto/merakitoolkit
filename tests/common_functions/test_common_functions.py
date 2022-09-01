@@ -1,6 +1,6 @@
 '''tests common functionalities for merakitoolkit'''
-import merakitoolkitparser # pylint: disable=import-error
-import merakitoolkit # pylint: disable=import-error
+import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disable=import-error
+import merakitoolkit.merakitoolkit as merakitoolkit # pylint: disable=import-error
 
 def test_import_success():
     '''Verify that merakitoolkit can be imported successfully'''
