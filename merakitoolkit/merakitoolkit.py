@@ -332,7 +332,7 @@ class MerakiToolkit():
                     # add MIMEBase object to MIMEMultipart object
                     msg_root.attach(mime)
             except Exception as err: # pylint: disable=broad-except
-                print("An error occurred while opening the logo image: ",err)
+                print("An error occurred while opening logo image: ",err)
 
         msg_html = merakitoolkitsupport.generate_email_body(
             "templatehtml.j2",

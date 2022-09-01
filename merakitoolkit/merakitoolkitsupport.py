@@ -45,7 +45,7 @@ def generate_psk(psk_list:list,randomize:bool=False):
         randomize = True
     if randomize:
         uppercase_position = random.randint(0,len(psk)-1)
-        symbols_position = [random.randint(0,len(psk)-1) for x in range(2)]
+        symbols_position = [random.randint(0,len(psk)-1) for x in range(1)]
         digit_position = random.randint(0,len(psk)-1)
         psk = psk[:uppercase_position] + psk[uppercase_position].upper() + psk[uppercase_position + 1:]
         for symbol_position in symbols_position:

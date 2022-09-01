@@ -5,7 +5,9 @@ Define a parser function to process input parameters for MerakiToolkit
 """
 
 # standard libraries
+from genericpath import exists
 import sys
+import os
 
 # additional libraries
 import argparse
@@ -40,6 +42,14 @@ def parser():
     # any new operation needs to be generated from the subparser object
     subparser = merakiparser.add_subparsers(help="meraki operations")
 
+
+    # PSK email generation command
+    psktemplatesubparser = subparser.add_parser(
+                                        "psktemplategen",
+                                        description="Generate PSK email template",
+                                        help="Generate PSK email template in local directory"
+                                        )
+    psktemplatesubparser.set_defaults(command="psktemplategen") # to identify in main() the command
     # psksubparser adds the "psk" operation
     # --------------------------------------------------------------------------------------------
     psksubparser = subparser.add_parser(
@@ -131,8 +141,23 @@ def parser():
         return_code = 1
     else:
         args = merakiparser.parse_args()
-        #verify that email template path is not missing the last forward slash
-        if args.emailtemplate[-1] != "/":
-            args.emailtemplate += "/"
+        if args.command == "psk":
+            # verify that email template path is not missing the last forward slash
+            if args.emailtemplate[-1] != "/":
+                args.emailtemplate += "/"
+
+            # verify that template path chosen is valid
+            if args.email:
+                templates = ["templatehtml.j2","templatetxt.j2"]
+                for template in templates:
+                    try:
+                        if not os.path.exists(args.emailtemplate+template):
+                            raise FileNotFoundError
+                    except FileNotFoundError as err:
+                        print("Template missing from template path,you can generate one with 'psktemplategen' command: ",err)
+                        sys.exit(2)
+        if args.command == "psktemplategen":
+            # for future use
+            pass
         return_code = 0
     return args,return_code
