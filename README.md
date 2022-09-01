@@ -108,7 +108,7 @@ QR code is automatically generated at each PSK change with the name *qrcode.png*
 
 Each image included in the template folder chosen is attached to the email template and can be inserted by referring to its filename stripped of the dot:<br>logo.png -> logopng
 
-![email sample image](/docs/emailsample.png "email sample image")
+![email sample image](https://github.com/g1augusto/merakitoolkit/raw/master/docs/emailsample.png "email sample image")
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
