@@ -9,5 +9,6 @@
 *.png
 !logo.png
 !logotest.png
+!docs/*
 merakitoolkit.egg-info/
 dist/
