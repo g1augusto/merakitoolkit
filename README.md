@@ -1,4 +1,4 @@
-# merakitoolkit
+# MerakiToolKit
 
 merakitoolkit is a Python application to automate specific tasks with Meraki Cloud networks.<br>
 Currently supported operations are
@@ -15,23 +15,62 @@ Currently supported operations are
 
 
 ## Installation
-
+------------------------------------------
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install merakitoolkit.
 
 ```bash
 pip install merakitoolkit
 ```
+Alternatively is possible to clone the git repository hosted on GitHub and install the necessary packages with the included requirements.txt or Pipfile.lock (for pipenv)
+```
+git clone https://github.com/g1augusto/merakitoolkit.git
+```
 <br>
 
 ## Usage
-### Pre Shared Key change
-```bash
-usage: merakitoolkit psk [-h] [-t TAGS [TAGS ...]] [-v] [-d] [-p PASSPHRASE] [-pr] [-e EMAIL [EMAIL ...]] [-et EMAILTEMPLATE] [--smtp-sender SMTP_SENDER] [--smtp-server SMTP_SERVER] [--smtp-port SMTP_PORT] [--smtp-mode {TLS,STARTTLS,SMTP}]
-                         [--smtp-user SMTP_USER] [--smtp-pass SMTP_PASS] -o ORGANIZATION [ORGANIZATION ...] -n NETWORK [NETWORK ...] -s SSID
+------------------------------------------
+**NOTE**<br>
+When installing MerakiToolKit from **pip** the program can be directly executed
+```
+$ merakitoolkit
+usage: merakitoolkit [-h] [-k APIKEY] {psktemplategen,psk} ...
+```
+When cloning MerakiToolKit from **git** it must be executed as a python module (-m)
+```
+$ pipenv run python -m merakitoolkit
+usage: __main__.py [-h] [-k APIKEY] {psktemplategen,psk} ...
+```
+
+### **Operations**
+```
+$ merakitoolkit
+usage: merakitoolkit [-h] [-k APIKEY] {psktemplategen,psk} ...
+
+Meraki Toolkit version 1.0.3.a
+
+positional arguments:
+  {psktemplategen,psk}  meraki operations
+    psktemplategen      Generate PSK email template in local directory
+    psk                 Pre Shared Key modifications
+
+options:
+  -h, --help            show this help message and exit
+  -k APIKEY, --apikey APIKEY
+                        Meraki API KEY, can be loaded from variable MERAKI_DASHBOARD_API_KEY
+
+Copyright (C) 2022 Giovanni Augusto | License: MIT
+```
+
+### **Pre Shared Key change**
+```
+usage: merakitoolkit psk [-h] [-t TAGS [TAGS ...]] [-v] [-d] [-p PASSPHRASE] [-pr] [-e EMAIL [EMAIL ...]]
+                         [-et EMAILTEMPLATE] [--smtp-sender SMTP_SENDER] [--smtp-server SMTP_SERVER]
+                         [--smtp-port SMTP_PORT] [--smtp-mode {TLS,STARTTLS,SMTP}] [--smtp-user SMTP_USER]
+                         [--smtp-pass SMTP_PASS] -o ORGANIZATION [ORGANIZATION ...] -n NETWORK [NETWORK ...] -s SSID
 
 Changes a Meraki SSID Pre Shared Key
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -t TAGS [TAGS ...], --tags TAGS [TAGS ...]
                         Specify a list of tags
@@ -59,7 +98,7 @@ optional arguments:
 
 required arguments:
   -o ORGANIZATION [ORGANIZATION ...], --organization ORGANIZATION [ORGANIZATION ...]
-                        Specify an Organization
+                        Specify one or more Organizations (ALL for all Organizations)
   -n NETWORK [NETWORK ...], --network NETWORK [NETWORK ...]
                         Specify one or more networks (ALL for all networks)
   -s SSID, --ssid SSID  Specify an SSID
@@ -90,6 +129,8 @@ merakitoolkit psk \
 ```
 <br>
 
+Is always reccommended to perform a first test with **--dryrun** and evaluate if the projected outcome reflects the desired outcome
+
 ## Using environment variables
 ------------------------------------------
 ### MerakiToolKit can be used with all its parameters passed in input via the command line but for some sensible information is better to use the environment variables listed below
@@ -97,7 +138,7 @@ merakitoolkit psk \
 | ----------- | ------------------------------------------ |
 | MERAKI_DASHBOARD_API_KEY      | [API key generated in Meraki Dashboard](https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API#Enable_API_Access)<br>**MERAKI_DASHBOARD_API_KEY=123456789abcdefghi**       |
 | MERAKITK_SMTP   | SMTP server informations separated by double colon :: in the form: <br>**MERAKITK_SMTP=SMTP_SERVER::PORT::MODE::USERNAME::PASSWORD** |
-|MERAKITK_PSK| Passphrase or list of possible words.<br>When multiple passhprases are available, entropy is always added to the final PSK<br>**MERAKITK_PSK=your_password123**<br>or<br>**MERAKITK_PSK=pass1::pass2:pass3:pass4:pass5**
+|MERAKITK_PSK| Passphrase or list of possible words.<br>When multiple passhprases are available, entropy is always added to the chosen PSK<br>**MERAKITK_PSK=your_password123**<br>or<br>**MERAKITK_PSK=pass1::pass2:pass3:pass4:pass5**
 
 <br><br>
 
@@ -108,19 +149,28 @@ QR code is automatically generated at each PSK change with the name *qrcode.png*
 
 Each image included in the template folder chosen is attached to the email template and can be inserted by referring to its filename stripped of the dot:<br>logo.png -> logopng
 <br><br>
-Default template to customize can be downloaded from Github : https://github.com/g1augusto/merakitoolkit/tree/master/merakitoolkit/templates/psk/default
+Default template to customize can be generated by the following command:
+```
+python -m merakitoolkit psktemplategen
+```
+this will generate a local copy of the default template folder under the ./merakitoolkit folder
+<br>
+in case the folder exists already an incremental number suffix will be added to the newly created one
 
 ![email sample image](https://github.com/g1augusto/merakitoolkit/raw/master/docs/emailsample.png "email sample image")
 
 ## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+------------------------------------------
+For major changes, please open an issue first to discuss what you would like to change and if you have specific feature request please open an issue in GitHub
 
-Please make sure to update tests as appropriate.
+Git repository includes all tests
 
 ## License
+------------------------------------------
 [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Third party libraries licenses and acknowledgements (THIRDPARTYLICENSES)
+------------------------------------------
 ```
 Apache-2.0
         'aiohttp' by None ('https://github.com/aio-libs/aiohttp')
