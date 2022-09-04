@@ -1,6 +1,8 @@
 # MerakiToolKit
+[![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/g1augusto/merakitoolkit)
+<br>
 
-merakitoolkit is a Python application to automate specific tasks with Meraki Cloud networks.<br>
+MerakiToolKit is a Python application to automate specific tasks with Meraki Cloud networks.<br>
 Currently supported operations are
 - Pre Shared Key Change (**psk**) on a specific SSID
   - filter by Organization (multiple)
