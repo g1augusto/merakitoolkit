@@ -154,7 +154,9 @@ class MerakiToolkit():
         Retrieve organizations from Meraki dashboard and return them
         '''
         try:
+            print(f"START: getting Organizations")
             organizations = await self.dashboard.organizations.getOrganizations()
+            print(f"END: getting Organizations")
             return organizations
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while retrieving Organizations: ",err)
@@ -165,7 +167,9 @@ class MerakiToolkit():
         Retrieve SSIDs from a Network in Meraki dashboard and return them
         '''
         try:
+            print(f"START: getting SSIDs for Network: {network['name']}")
             ssids = await self.dashboard.wireless.getNetworkWirelessSsids(network["id"])
+            print(f"END: getting SSIDs for Network: {network['name']}")
             return ssids
         except meraki.exceptions.AsyncAPIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
@@ -182,7 +186,9 @@ class MerakiToolkit():
         Retrieve Networks from an organization in Meraki dashboard and return them
         '''
         try:
+            print(f"START: getting networks for org: {organization['name']}")
             networks = await self.dashboard.organizations.getOrganizationNetworks(organization["id"])
+            print(f"END: getting networks for org: {organization['name']}")
             return networks
         except meraki.exceptions.AsyncAPIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} Organization: {organization["name"]}')
