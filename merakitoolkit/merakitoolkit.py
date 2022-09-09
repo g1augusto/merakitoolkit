@@ -348,12 +348,14 @@ class MerakiToolkit():
                 # Execution code : at this point data is being changed (or simulated) on Meraki Cloud
                 # NOTE : this portion could be extracted into a standalone executor method for multiple tasks
                 if settings["dryrun"] or settings["verbose"]>=1:
-                    print(f'{"Organization":<25} {"Network:":<45} {"SSID:":<20} {"PSK:":<20}')
+                    if settings["dryrun"]:
+                        data_has_changed = True
+                        print("\033[91m","\nDRYRUN Enabled: Changes below will not be applied")
+                        print("\033[0m","-"*110)
+                    print(f'{"Organization:":<25} {"Network:":<45} {"SSID:":<20} {"PSK:":<20}')
                     for network in networks_to_process:
-                        print("-"*100)
+                        print("-"*110)
                         print(f"{network['organization']:<25} {network['name']:<45} {network['ssidName']:<20} {settings['passphrase']:<20}") # pylint: disable=line-too-long
-                        if settings["dryrun"]:
-                            data_has_changed = True
                 else:
                     for network in networks_to_process:
                         data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])
@@ -367,7 +369,8 @@ class MerakiToolkit():
             print("An error occurred while running PSK change: ",err)
             sys.exit(2)
 
-    # refactor email send method
+
+
     def send_email_psk(self):
         ''' send email for PSK change notification'''
 
