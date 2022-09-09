@@ -138,6 +138,8 @@ class MerakiToolkit():
                 simulate=False,
                 caller="merakitoolkit"
                 )
+        except meraki.exceptions.AsyncAPIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]}')
         except meraki.exceptions.APIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]}')
         except Exception as err: # pylint: disable=broad-except
@@ -163,6 +165,9 @@ class MerakiToolkit():
         try:
             ssids = self.dashboard.wireless.getNetworkWirelessSsids(network["id"])
             return ssids
+        except meraki.exceptions.AsyncAPIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
+            return None
         except meraki.exceptions.APIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
             return None
@@ -177,6 +182,9 @@ class MerakiToolkit():
         try:
             networks = self.dashboard.organizations.getOrganizationNetworks(organization["id"])
             return networks
+        except meraki.exceptions.AsyncAPIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} Organization: {organization["name"]}')
+            return None
         except meraki.exceptions.APIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} Organization: {organization["name"]}')
             return None
@@ -194,6 +202,9 @@ class MerakiToolkit():
                 return True
             else:
                 raise ValueError(f"PSK change : {ssid['name']} passhprase was not changed!")
+        except meraki.exceptions.AsyncAPIError as err:
+            print(f'operation: {err.operation} error: {err.message["errors"]} Network: {network["id"]} SSID: {network["ssidName"]}') # pylint: disable=line-too-long
+            return False
         except meraki.exceptions.APIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} Network: {network["id"]} SSID: {network["ssidName"]}') # pylint: disable=line-too-long
             return False
