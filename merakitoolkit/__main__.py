@@ -5,6 +5,7 @@ main program executable
 """
 
 # standard libraries
+import asyncio
 import sys
 import os
 from importlib import resources
@@ -14,14 +15,14 @@ import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disabl
 import merakitoolkit.merakitoolkit as merakitoolkit
 
 
-def main() -> int:
+async def main() -> int:
     '''merakitoolkit main program call'''
 
     mainparser,return_code = merakitoolkitparser.parser()
     if mainparser:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
-            merakiobj.pskchange()
+            await merakiobj.pskchange()
             if mainparser.email:
                 merakiobj.send_email_psk()
         if mainparser.command == "psktemplategen":
@@ -61,4 +62,4 @@ def main() -> int:
     return return_code
 
 if __name__ == "__main__":
-    sys.exit(main())
+    asyncio.run(main())
