@@ -25,7 +25,7 @@ from . import merakitoolkitsupport
 __author__ = "Giovanni Augusto"
 __copyright__ = "Copyright (C) 2022 Giovanni Augusto"
 __license__ = "MIT"
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 
 
 class MerakiToolkit():
@@ -133,11 +133,18 @@ class MerakiToolkit():
     def connect(self):
         '''
         connects to Meraki dashboard
+        ASYNC : returns an initialized meraki.aio.AsyncDashboardAPI object
+        object is to be used with 'async with' in calling methods (pskchangeasync)
+        and reference 'as' is to be self.dashboard
         '''
+        if self.current_operation["settings"]["verbose"] >= 3:
+            logging = True
+        else :
+            logging = False
         try:
             return meraki.aio.AsyncDashboardAPI(
                 api_key=self.apikey,
-                suppress_logging=not self.current_operation["settings"]["verbose"],
+                suppress_logging=not logging,
                 simulate=False,
                 caller="merakitoolkit"
                 )
@@ -155,9 +162,11 @@ class MerakiToolkit():
         Retrieve organizations from Meraki dashboard and return them
         '''
         try:
-            print("START: getting Organizations")
+            if self.current_operation["settings"]["verbose"]>=2: 
+                print("START: getting Organizations")
             organizations = await self.dashboard.organizations.getOrganizations()
-            print("END: getting Organizations")
+            if self.current_operation["settings"]["verbose"]>=2:
+                print("END: getting Organizations")
             return organizations
         except meraki.exceptions.AsyncAPIError as err:
             # Too many requests
@@ -172,14 +181,17 @@ class MerakiToolkit():
             print("An error occurred while retrieving Organizations: ",err)
             sys.exit(2)
 
+
     async def get_network_wireless_ssids(self,network):
         '''
         Retrieve SSIDs from a Network in Meraki dashboard and return them
         '''
         try:
-            print(f"START: getting SSIDs for Network: {network['name']}")
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"START: getting SSIDs for Network: {network['name']}")
             ssids = await self.dashboard.wireless.getNetworkWirelessSsids(network["id"])
-            print(f"END: getting SSIDs for Network: {network['name']}")
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"END: getting SSIDs for Network: {network['name']}")
             return ssids
         except meraki.exceptions.AsyncAPIError as err:
             # Too many requests
@@ -203,9 +215,11 @@ class MerakiToolkit():
         Retrieve Networks from an organization in Meraki dashboard and return them
         '''
         try:
-            print(f"START: getting networks for org: {organization['name']}")
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"START: getting networks for org: {organization['name']}")
             networks = await self.dashboard.organizations.getOrganizationNetworks(organization["id"])
-            print(f"END: getting networks for org: {organization['name']}")
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"END: getting networks for org: {organization['name']}")
             return networks
         except meraki.exceptions.AsyncAPIError as err:
             # Too many requests
@@ -229,7 +243,11 @@ class MerakiToolkit():
         update Wireless SSID in a network and return outcome of the operation
         '''
         try:
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"START: updating PSK for network: {network['name']}")
             ssid = await self.dashboard.wireless.updateNetworkWirelessSsid(network["id"],network["ssidPosition"],psk=passphrase)
+            if self.current_operation["settings"]["verbose"]>=2:
+                print(f"END: updating PSK for network: {network['name']}")
             if ssid["psk"] == passphrase:
                 return True
             else:
@@ -320,19 +338,22 @@ class MerakiToolkit():
                         process_networks_tasks = []
                         for network in networks:
                             process_networks_tasks.append(process_network(organization,network,settings))
-                        networks_to_process = await asyncio.gather(*process_networks_tasks)
-                        networks_to_process = [x for x in networks_to_process if x is not None]
+                        current_networks_to_process = await asyncio.gather(*process_networks_tasks)
+                        # Clean current networks list of the null entries and keep only networks to process
+                        # extend the final network to process list with the networks for the current org
+                        networks_to_process.extend([x for x in current_networks_to_process if x is not None])
 
 
 
                 # Execution code : at this point data is being changed (or simulated) on Meraki Cloud
                 # NOTE : this portion could be extracted into a standalone executor method for multiple tasks
-                if settings["dryrun"]:
+                if settings["dryrun"] or settings["verbose"]>=1:
                     print(f'{"Organization":<25} {"Network:":<45} {"SSID:":<20} {"PSK:":<20}')
                     for network in networks_to_process:
                         print("-"*100)
                         print(f"{network['organization']:<25} {network['name']:<45} {network['ssidName']:<20} {settings['passphrase']:<20}") # pylint: disable=line-too-long
-                        data_has_changed = True
+                        if settings["dryrun"]:
+                            data_has_changed = True
                 else:
                     for network in networks_to_process:
                         data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])

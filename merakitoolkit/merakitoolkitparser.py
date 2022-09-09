@@ -67,7 +67,9 @@ def parser():
                         action="store")
     psksubparser.add_argument("-v",
                         "--verbose",
-                        help="Enable logging (also for Meraki API)",action="store_true")
+                        help="Enable logging (also for Meraki API)",
+                        action="count",
+                        default=0)
     psksubparser.add_argument("-d",
                         "--dryrun",
                         help="Enable a failsafe run by only listing actions without applying them",
