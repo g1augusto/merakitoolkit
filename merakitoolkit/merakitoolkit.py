@@ -274,6 +274,9 @@ class MerakiToolkit():
         Change Pre Shared Key for an SSID in specified network name in organizations
         '''
 
+        # Coroutine to process Networks in an organization for PSK change
+        # returns data of a network to process (if parameters has a match)
+        # returns None if there is no match -> needs to explicitly cleanup later 'None' entries from networks list
         async def process_network(organization,network,settings):
             if (network["name"] not in settings["network"]) and ("ALL" not in settings["network"]):
                 return None
@@ -282,15 +285,12 @@ class MerakiToolkit():
                 if not any( tag in settings["tags"] for tag in network["tags"]):
                     return None
             # retrieve SSIDs of the evaluated network
-            #task_network_ssids = asyncio.create_task(self.get_network_wireless_ssids(network)) # pylint: disable=line-too-long
-            #network_ssids = await task_network_ssids
+            # uses awaitable method that will be leveraged later by asyncio.gather()
             network_ssids = await self.get_network_wireless_ssids(network)
             # some networks has no SSIDs (camera,appliance,etc) so we skip those
             if not network_ssids:
                 return None
             network_to_process = None
-            if inspect.iscoroutine(network_ssids):
-                print(network_ssids)
             for ssidposition in range(len(network_ssids)): # pylint: disable=consider-using-enumerate
                 if settings["ssid"] == network_ssids[ssidposition]["name"]: # SSID is found
                     # create dictionary to collect all necessary information
@@ -323,6 +323,9 @@ class MerakiToolkit():
             # flag to set to save relevant data for other processes
             data_has_changed = False
 
+            # Create context manager for the async mereaki.aio.AsyncDashboardAPI object (necessary to ensure a proper closure)
+            # Standard in MerakiToolKit is to store context manager variable in self.dashboard
+            # connect() method is used to aggregate all settings centrally
             async with self.connect() as self.dashboard:
                 task_organizations = asyncio.create_task(self.get_organizations())
                 organizations = await task_organizations
@@ -340,7 +343,7 @@ class MerakiToolkit():
                             process_networks_tasks.append(process_network(organization,network,settings))
                         current_networks_to_process = await asyncio.gather(*process_networks_tasks)
                         # Clean current networks list of the null entries and keep only networks to process
-                        # extend the final network to process list with the networks for the current org
+                        # extend the final networks_to_process list with the interesting networks for the current org
                         networks_to_process.extend([x for x in current_networks_to_process if x is not None])
 
 
