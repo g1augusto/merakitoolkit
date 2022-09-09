@@ -6,6 +6,7 @@ Define MerakiToolKit class to ease operations with Meraki Cloud
 
 # standard libraries
 import asyncio
+import inspect
 import os
 import sys
 import smtplib
@@ -15,6 +16,7 @@ from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
 from datetime import date
+from types import coroutine
 
 # additional libraries
 import meraki
@@ -154,9 +156,9 @@ class MerakiToolkit():
         Retrieve organizations from Meraki dashboard and return them
         '''
         try:
-            print(f"START: getting Organizations")
+            print("START: getting Organizations")
             organizations = await self.dashboard.organizations.getOrganizations()
-            print(f"END: getting Organizations")
+            print("END: getting Organizations")
             return organizations
         except Exception as err: # pylint: disable=broad-except
             print("An error occurred while retrieving Organizations: ",err)
@@ -172,8 +174,14 @@ class MerakiToolkit():
             print(f"END: getting SSIDs for Network: {network['name']}")
             return ssids
         except meraki.exceptions.AsyncAPIError as err:
-            print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
-            return None
+            # Too many requests
+            if err.response.status == 429:
+                # wait for the time indicated in reponse header Retry-After
+                await asyncio.sleep(int(err.response.headers["Retry-After"]))
+                return await self.get_network_wireless_ssids(network)
+            else:
+                print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
+                return None
         except meraki.exceptions.APIError as err:
             print(f'operation: {err.operation} error: {err.message["errors"]} network: {network["name"]}')
             return None
@@ -304,6 +312,100 @@ class MerakiToolkit():
             print("An error occurred while running PSK change: ",err)
             sys.exit(2)
 
+    async def pskchangeasync(self):
+        '''
+        Change Pre Shared Key for an SSID in specified network name in organizations
+        '''
+
+        async def process_network(organization,network,settings):
+            if (network["name"] not in settings["network"]) and ("ALL" not in settings["network"]):
+                return None
+            # verify that at least one of the TAGs is in the list of network tags
+            if settings["tags"]:
+                if not any( tag in settings["tags"] for tag in network["tags"]):
+                    return None
+            # retrieve SSIDs of the evaluated network
+            #task_network_ssids = asyncio.create_task(self.get_network_wireless_ssids(network)) # pylint: disable=line-too-long
+            #network_ssids = await task_network_ssids
+            network_ssids = await self.get_network_wireless_ssids(network)
+            # some networks has no SSIDs (camera,appliance,etc) so we skip those
+            if not network_ssids:
+                return None
+            network_to_process = None
+            if inspect.iscoroutine(network_ssids):
+                print(network_ssids)
+            for ssidposition in range(len(network_ssids)): # pylint: disable=consider-using-enumerate
+                if settings["ssid"] == network_ssids[ssidposition]["name"]: # SSID is found
+                    # create dictionary to collect all necessary information
+                    network_to_process = {}
+                    network_to_process["organization"] = organization["name"]
+                    network_to_process["name"] = network["name"]
+                    network_to_process["id"] = network["id"]
+                    network_to_process["ssidPosition"] = str(ssidposition)
+                    network_to_process["ssidName"] = network_ssids[ssidposition]["name"]
+                    network_to_process["wpaEncryptionMode"] = network_ssids[ssidposition]["wpaEncryptionMode"]
+                    break # SSID was found -> exit the loop
+            return network_to_process
+
+        settings = self.current_operation["settings"]
+
+        try:
+            if settings is None:
+                raise ValueError("PSK change : No operation has been defined")
+            # verify that mandatory attributes are present, otherwise raise a ValueError exception
+            if settings["organization"] is None:
+                raise ValueError("PSK change : Organization input list is empty")
+            if settings["network"] is None:
+                raise ValueError("PSK change : Networks input list is empty")
+            if (settings["passphrase"] is None) or (len(settings["passphrase"])<8):
+                raise ValueError("PSK change : PSK input is empty or less than 8 characters")
+
+            # network_to_process will contain the list of networks to apply the PSK change
+            networks_to_process = []
+
+            # flag to set to save relevant data for other processes
+            data_has_changed = False
+
+            async with self.connect() as self.dashboard:
+                task_organizations = asyncio.create_task(self.get_organizations())
+                organizations = await task_organizations
+
+
+                # scan matching organizations -> networks -> ssid -> collect data
+                for organization in organizations:
+                    # Verify that the current organization is in the list of organizations to process
+                    if organization["name"] in settings["organization"] or "ALL" in settings["organization"]:
+                        # Retrieve Networks for the current organization
+                        task_networks = asyncio.create_task(self.get_organization_networks(organization))
+                        networks = await task_networks
+                        process_networks_tasks = []
+                        for network in networks:
+                            process_networks_tasks.append(process_network(organization,network,settings))
+                        networks_to_process = await asyncio.gather(*process_networks_tasks)
+                        networks_to_process = [x for x in networks_to_process if x is not None]
+
+
+
+                # Execution code : at this point data is being changed (or simulated) on Meraki Cloud
+                # NOTE : this portion could be extracted into a standalone executor method for multiple tasks
+                if settings["dryrun"]:
+                    print(f'{"Organization":<25} {"Network:":<45} {"SSID:":<20} {"PSK:":<20}')
+                    for network in networks_to_process:
+                        print("-"*100)
+                        print(f"{network['organization']:<25} {network['name']:<45} {network['ssidName']:<20} {settings['passphrase']:<20}") # pylint: disable=line-too-long
+                        data_has_changed = True
+                else:
+                    for network in networks_to_process:
+                        data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])
+
+                # save last operation data only if a change (real or simulated) happened
+                if data_has_changed:
+                    self.current_operation["networks_to_process"] = networks_to_process
+                    self.current_operation["success"] = True
+
+        except SystemExit as err: # pylint: disable=broad-except
+            print("An error occurred while running PSK change: ",err)
+            sys.exit(2)
     # refactor email send method
     def send_email_psk(self):
         ''' send email for PSK change notification'''

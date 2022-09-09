@@ -22,7 +22,7 @@ async def main() -> int:
     if mainparser:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
-            await merakiobj.pskchange()
+            await merakiobj.pskchangeasync()
             if mainparser.email:
                 merakiobj.send_email_psk()
         if mainparser.command == "psktemplategen":
