@@ -326,24 +326,32 @@ class MerakiToolkit():
             # Standard in MerakiToolKit is to store context manager variable in self.dashboard
             # connect() method is used to aggregate all settings centrally
             async with self.connect() as self.dashboard:
+                # async tasks collection:
+                # collect organizations->collect networks in organization->collect SSID->add item to list of networks to process
+
+                # async collect organizations (create task->await task)
                 task_organizations = asyncio.create_task(self.get_organizations())
                 organizations = await task_organizations
-
-
-                # scan matching organizations -> networks -> ssid -> collect data
+                # process_networks_tasks -> list of coroutines for networks to process
+                process_networks_tasks = []
+                # in each organization retrieve list of networks
                 for organization in organizations:
                     # Verify that the current organization is in the list of organizations to process
                     if organization["name"] in settings["organization"] or "ALL" in settings["organization"]:
-                        # Retrieve Networks for the current organization
+                        # async collect list of networks (create task->await task)
                         task_networks = asyncio.create_task(self.get_organization_networks(organization))
                         networks = await task_networks
-                        process_networks_tasks = []
+                        # create a coroutine to process each network and add it to process_networks_tasks list
                         for network in networks:
                             process_networks_tasks.append(process_network(organization,network,settings))
-                        current_networks_to_process = await asyncio.gather(*process_networks_tasks)
-                        # Clean current networks list of the null entries and keep only networks to process
-                        # extend the final networks_to_process list with the interesting networks for the current org
-                        networks_to_process.extend([x for x in current_networks_to_process if x is not None])
+                
+                # Collection happened through an iteration with async awaits 
+                # here we process all coroutines collected asynchronously with asyncio.gather
+                # asyncio.gather -> returns values when all coroutines are completed
+                current_networks_to_process = await asyncio.gather(*process_networks_tasks)
+                # Clean current networks list of the null entries and keep only networks to process
+                # extend the final networks_to_process list with the interesting networks for the current org
+                networks_to_process.extend([x for x in current_networks_to_process if x is not None])
 
 
 
