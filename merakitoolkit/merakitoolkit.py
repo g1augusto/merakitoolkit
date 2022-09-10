@@ -6,7 +6,6 @@ Define MerakiToolKit class to ease operations with Meraki Cloud
 
 # standard libraries
 import asyncio
-import inspect
 import os
 import sys
 import smtplib
@@ -162,7 +161,7 @@ class MerakiToolkit():
         Retrieve organizations from Meraki dashboard and return them
         '''
         try:
-            if self.current_operation["settings"]["verbose"]>=2: 
+            if self.current_operation["settings"]["verbose"]>=2:
                 print("START: getting Organizations")
             organizations = await self.dashboard.organizations.getOrganizations()
             if self.current_operation["settings"]["verbose"]>=2:
