@@ -22,7 +22,7 @@ async def main() -> int:
     if mainparser:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
-            await merakiobj.pskchangeasync()
+            asyncio.run(merakiobj.pskchangeasync())
             if mainparser.email:
                 merakiobj.send_email_psk()
         if mainparser.command == "psktemplategen":
@@ -62,4 +62,4 @@ async def main() -> int:
     return return_code
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    sys.exit(main())
