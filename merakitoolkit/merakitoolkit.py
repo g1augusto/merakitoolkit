@@ -344,8 +344,8 @@ class MerakiToolkit():
                         # create a coroutine to process each network and add it to process_networks_tasks list
                         for network in networks:
                             process_networks_tasks.append(process_network(organization,network,settings))
-                
-                # Collection happened through an iteration with async awaits 
+
+                # Collection happened through an iteration with async awaits
                 # here we process all coroutines collected asynchronously with asyncio.gather
                 # asyncio.gather -> returns values when all coroutines are completed
                 current_networks_to_process = await asyncio.gather(*process_networks_tasks)
@@ -367,8 +367,11 @@ class MerakiToolkit():
                         print("-"*110)
                         print(f"{network['organization']:<25} {network['name']:<45} {network['ssidName']:<20} {settings['passphrase']:<20}") # pylint: disable=line-too-long
                 else:
+                    update_networks_tasks = []
                     for network in networks_to_process:
-                        data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])
+                        update_networks_tasks.append(self.update_network_wireless_ssid(network,settings["passphrase"]))
+                        #data_has_changed = self.update_network_wireless_ssid(network,settings["passphrase"])
+                    data_has_changed = True in await asyncio.gather(*update_networks_tasks)
 
                 # save last operation data only if a change (real or simulated) happened
                 if data_has_changed:

@@ -36,7 +36,7 @@ def test_parser_psk_min_params(monkeypatch):
     assert isinstance(args.organization,list)
     assert args.ssid == "SSID"
     assert isinstance(args.ssid,str)
-    assert args.verbose is False
+    assert args.verbose == 0
     assert return_code == 0
     assert args.tags is None
     assert args.passphrase is None
@@ -89,7 +89,7 @@ def test_parser_psk_all_params(monkeypatch):
     assert isinstance(args.tags,list)
     assert args.ssid == "SSID"
     assert isinstance(args.ssid,str)
-    assert args.verbose is True
+    assert args.verbose == 1
     assert args.emailtemplate == "./testtemplate/"
     assert args.smtp_server == "smtp.test.net"
     assert args.smtp_port == "111"

@@ -4,6 +4,7 @@ import os
 import json
 import pytest
 import meraki
+import meraki.aio
 import merakitoolkit.merakitoolkit as merakitoolkit # pylint: disable=import-error
 
 # Assume that the correct Meraki API key is the following
@@ -34,35 +35,41 @@ def fixture_mock_meraki_dashboard(monkeypatch):
 
     # mock function to get organizations
     # verify if API key is correct and return fake organization data
-    def mock_getOrganizations(obj,*args,**kwargs): # pylint: disable=unused-argument disable=invalid-name
+    # ASYNC: mock functions had to be changed to "async def" to comply with the execution flow of the original methods
+    async def mock_getOrganizations(obj,*args,**kwargs): # pylint: disable=unused-argument disable=invalid-name
         if obj._session._api_key == APIKEY_CORRECT: # pylint: disable=protected-access
             return organization_data
         else:
             raise Exception("Mock wrong Meraki API key")
 
     # parse the networks data file data and return only a list with matching organization ID
-    def mock_getOrganizationNetworks(obj,org_id): # pylint: disable=unused-argument disable=invalid-name
+    # ASYNC: mock functions had to be changed to "async def" to comply with the execution flow of the original methods
+    async def mock_getOrganizationNetworks(obj,org_id): # pylint: disable=unused-argument disable=invalid-name
         return [x for x in networks_data if x["organizationId"] == org_id]
 
     # ssid data is a dictionary with the networkID as key for a list of SSIDs
-    def mock_getNetworkWirelessSsids(obj,net_id): # pylint: disable=unused-argument disable=invalid-name
+    # ASYNC: mock functions had to be changed to "async def" to comply with the execution flow of the original methods
+    async def mock_getNetworkWirelessSsids(obj,net_id): # pylint: disable=unused-argument disable=invalid-name
         return ssid_data.get(net_id)
 
     # mock update SSID data by updating ssid_data dictionary (to be used for assertions)
-    def mock_updateNetworkWirelessSsid(obj,net_id,ssidPosition,psk): # pylint: disable=unused-argument disable=invalid-name
+    # ASYNC: mock functions had to be changed to "async def" to comply with the execution flow of the original methods
+    async def mock_updateNetworkWirelessSsid(obj,net_id,ssidPosition,psk): # pylint: disable=unused-argument disable=invalid-name
         ssid_data[net_id][int(ssidPosition)]["psk"] = psk
         return ssid_data[net_id][int(ssidPosition)]
 
     # modify meraki methods to return mock data
-    monkeypatch.setattr(meraki.Organizations,"getOrganizations",mock_getOrganizations)
-    monkeypatch.setattr(meraki.Organizations,"getOrganizationNetworks",mock_getOrganizationNetworks)
-    monkeypatch.setattr(meraki.Wireless,"getNetworkWirelessSsids",mock_getNetworkWirelessSsids)
-    monkeypatch.setattr(meraki.Wireless,"updateNetworkWirelessSsid",mock_updateNetworkWirelessSsid)
+    # ASYNC: mocked original classes are now referring to the async version of meraki SDK
+    monkeypatch.setattr(meraki.aio.AsyncOrganizations,"getOrganizations",mock_getOrganizations)
+    monkeypatch.setattr(meraki.aio.AsyncOrganizations,"getOrganizationNetworks",mock_getOrganizationNetworks)
+    monkeypatch.setattr(meraki.aio.AsyncWireless,"getNetworkWirelessSsids",mock_getNetworkWirelessSsids)
+    monkeypatch.setattr(meraki.aio.AsyncWireless,"updateNetworkWirelessSsid",mock_updateNetworkWirelessSsid)
 
-
-def test_pskchg_org_one_net_one_dryrun_no_psk_input(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_input(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -95,13 +102,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_input(mock_meraki_dashboard): # py
     os.environ["MERAKITK_PSK"] = "Abracadabra1234"
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
 
 
-def test_pskchg_org_one_net_one_dryrun_no_psk_input_random(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_input_random(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -134,13 +143,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_input_random(mock_meraki_dashboard
     os.environ["MERAKITK_PSK"] = "Abracadabra1234"
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == merakiobj._current_operation["settings"]["passphrase"] # pylint: disable=protected-access,line-too-long
 
 
-def test_pskchg_org_one_net_one_dryrun_no_psk_env(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_env(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -173,12 +184,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_env(mock_meraki_dashboard): # pyli
     os.environ["MERAKITK_PSK"] = "Abracadabra1234"
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == os.environ["MERAKITK_PSK"]
 
-def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -211,12 +225,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi(mock_meraki_dashboard): 
     os.environ["MERAKITK_PSK"] = "Pass123word1!::Pass123word2!::Pass123word3!::Pass123word4!::Pass123word5!"
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] in os.environ["MERAKITK_PSK"].split("::")
 
-def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi_random(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi_random(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -249,14 +266,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_env_multi_random(mock_meraki_dashb
     os.environ["MERAKITK_PSK"] = "Pass123word1!::Pass123word2!::Pass123word3!::Pass123word4!::Pass123word5!"
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == merakiobj._current_operation["settings"]["passphrase"] # pylint: disable=protected-access,line-too-long
 
 
-
-def test_pskchg_org_one_net_one_dryrun_no_psk_env_random(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_env_random(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -283,12 +301,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_env_random(mock_meraki_dashboard):
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == merakiobj._current_operation["settings"]["passphrase"] # pylint: disable=protected-access,line-too-long
 
-def test_pskchg_org_one_net_one_dryrun_no_psk_no_env_no(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_psk_no_env_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -323,14 +344,15 @@ def test_pskchg_org_one_net_one_dryrun_no_psk_no_env_no(mock_meraki_dashboard): 
         del os.environ["MERAKITK_PSK"]
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == merakiobj._current_operation["settings"]["passphrase"] # pylint: disable=protected-access,line-too-long
 
 
-
-def test_pskchg_org_one_net_one_dryrun_yes(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_yes(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : yes
@@ -357,14 +379,16 @@ def test_pskchg_org_one_net_one_dryrun_yes(mock_meraki_dashboard): # pylint: dis
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == "testtest"
 
 
-def test_pskchg_org_one_net_two_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_two_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : two
     dryrun : no
@@ -391,13 +415,16 @@ def test_pskchg_org_one_net_two_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_one_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : ALL
     dryrun : no
@@ -425,14 +452,17 @@ def test_pskchg_org_one_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_one_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : ALL
     dryrun : no
@@ -461,14 +491,17 @@ def test_pskchg_org_one_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pyl
 
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_two_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_two_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : two
     networks : ALL
     dryrun : no
@@ -496,16 +529,19 @@ def test_pskchg_org_two_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_all_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_all_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : two
     networks : ALL
     dryrun : no
@@ -533,16 +569,19 @@ def test_pskchg_org_all_net_all_dryrun_no_tags_no(mock_meraki_dashboard): # pyli
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_two_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_two_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : two
     networks : ALL
     dryrun : no
@@ -570,16 +609,19 @@ def test_pskchg_org_two_net_all_dryrun_no_tags_two(mock_meraki_dashboard): # pyl
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == "testtest"
 
-def test_pskchg_org_two_net_two_dryrun_no_tags_one(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_two_net_two_dryrun_no_tags_one(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : two
     networks : ALL
     dryrun : no
@@ -607,16 +649,19 @@ def test_pskchg_org_two_net_two_dryrun_no_tags_one(mock_meraki_dashboard): # pyl
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481105433"][3]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111545"][5]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481105433"][3]["psk"] == "testtest"
     assert mock_meraki_dashboard_results["ssid_data"]["L_636829496481111675"][1]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_one_net_one_dryrun_no_email(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_email(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -644,13 +689,16 @@ def test_pskchg_org_one_net_one_dryrun_no_email(mock_meraki_dashboard): # pylint
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     merakiobj.send_email_psk()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]
 
-def test_pskchg_org_one_net_one_dryrun_no_email2(mock_meraki_dashboard): # pylint: disable=unused-argument
+
+# @pytest.mark.asyncio -> necessary to define execute in a test loop any async test function (pytest-asyncio)
+@pytest.mark.asyncio
+async def test_pskchg_org_one_net_one_dryrun_no_email2(mock_meraki_dashboard): # pylint: disable=unused-argument
     '''
-    test pskchange method with no organization
+    test pskchangeasync method with no organization
     organizations : one
     networks : one
     dryrun : no
@@ -678,6 +726,6 @@ def test_pskchg_org_one_net_one_dryrun_no_email2(mock_meraki_dashboard): # pylin
         }
 
     merakiobj = merakitoolkit.MerakiToolkit(settings)
-    merakiobj.pskchange()
+    await merakiobj.pskchangeasync()
     merakiobj.send_email_psk()
     assert mock_meraki_dashboard_results["ssid_data"]["L_646829496481111675"][1]["psk"] == settings["passphrase"]

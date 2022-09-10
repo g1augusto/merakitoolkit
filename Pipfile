@@ -17,6 +17,7 @@ third-party-license-file-generator = "*"
 install = "*"
 build = "*"
 twine = "*"
+pytest-asyncio = "*"
 
 [requires]
 python_version = "3.8"
