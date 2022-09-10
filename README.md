@@ -15,6 +15,9 @@ Currently supported operations are
 
 <br>
 
+## Changelog (major changes)
+- 02/09/2022 - 1.0.3 - Stable synchronous release
+- 10/09/2022 - 1.1.0 - Stable Asynchronous release
 
 ## Installation
 ------------------------------------------
@@ -65,18 +68,16 @@ Copyright (C) 2022 Giovanni Augusto | License: MIT
 
 ### **Pre Shared Key change**
 ```
-usage: merakitoolkit psk [-h] [-t TAGS [TAGS ...]] [-v] [-d] [-p PASSPHRASE] [-pr] [-e EMAIL [EMAIL ...]]
-                         [-et EMAILTEMPLATE] [--smtp-sender SMTP_SENDER] [--smtp-server SMTP_SERVER]
-                         [--smtp-port SMTP_PORT] [--smtp-mode {TLS,STARTTLS,SMTP}] [--smtp-user SMTP_USER]
-                         [--smtp-pass SMTP_PASS] -o ORGANIZATION [ORGANIZATION ...] -n NETWORK [NETWORK ...] -s SSID
+usage: merakitoolkit psk [-h] [-t TAGS [TAGS ...]] [-v] [-d] [-p PASSPHRASE] [-pr] [-e EMAIL [EMAIL ...]] [-et EMAILTEMPLATE] [--smtp-sender SMTP_SENDER] [--smtp-server SMTP_SERVER] [--smtp-port SMTP_PORT] [--smtp-mode {TLS,STARTTLS,SMTP}]
+                       [--smtp-user SMTP_USER] [--smtp-pass SMTP_PASS] -o ORGANIZATION [ORGANIZATION ...] -n NETWORK [NETWORK ...] -s SSID
 
 Changes a Meraki SSID Pre Shared Key
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -t TAGS [TAGS ...], --tags TAGS [TAGS ...]
                         Specify a list of tags
-  -v, --verbose         Enable logging (also for Meraki API)
+  -v, --verbose         Incremental logging level 1: print operation resuls 2: Print concurrent functions execution 3: Print Meraki API calls and save them to local log file
   -d, --dryrun          Enable a failsafe run by only listing actions without applying them
   -p PASSPHRASE, --passphrase PASSPHRASE
                         PSK, can be loaded from env MERAKITK_PSK
@@ -105,6 +106,10 @@ required arguments:
                         Specify one or more networks (ALL for all networks)
   -s SSID, --ssid SSID  Specify an SSID
 
+```
+
+## Examples
+```
 # SIMULATE a PSK change for an SSID in all networks for an organization, print a report of what would have happened (API KEY, email, PSK are set via env variables)
 merakitoolkit psk \ 
 --dryrun \

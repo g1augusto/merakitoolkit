@@ -67,7 +67,10 @@ def parser():
                         action="store")
     psksubparser.add_argument("-v",
                         "--verbose",
-                        help="Enable logging (also for Meraki API)",
+                        help='''Incremental logging level
+                        1: print operation resuls
+                        2: Print concurrent functions execution
+                        3: Print Meraki API calls and save them to local log file ''',
                         action="count",
                         default=0)
     psksubparser.add_argument("-d",
