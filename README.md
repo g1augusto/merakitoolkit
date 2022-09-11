@@ -18,6 +18,7 @@ Currently supported operations are
 ## Changelog (major changes)
 - 02/09/2022 - 1.0.3 - Stable synchronous release
 - 10/09/2022 - 1.1.0 - Stable Asynchronous release
+- 11/09/2022 - 1.1.3 - Stable Asynchronous release (Linux and Windows)
 
 ## Installation
 ------------------------------------------

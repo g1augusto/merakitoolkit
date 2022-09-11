@@ -22,6 +22,9 @@ def main() -> int:
     if mainparser:
         if mainparser.command == "psk":
             merakiobj = merakitoolkit.MerakiToolkit(vars(mainparser))
+            # This is a bugfix for async Event loop in windows (seems for aiohttp) https://stackoverflow.com/a/68137823/13616177
+            if os.name == 'nt':
+                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
             asyncio.run(merakiobj.pskchangeasync())
             if mainparser.email:
                 merakiobj.send_email_psk()
