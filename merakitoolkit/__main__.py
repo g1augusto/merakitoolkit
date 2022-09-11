@@ -15,7 +15,7 @@ import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disabl
 import merakitoolkit.merakitoolkit as merakitoolkit
 
 
-async def main() -> int:
+def main() -> int:
     '''merakitoolkit main program call'''
 
     mainparser,return_code = merakitoolkitparser.parser()

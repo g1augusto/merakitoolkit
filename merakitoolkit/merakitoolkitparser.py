@@ -84,7 +84,7 @@ def parser():
                         action="store")
     psksubparser.add_argument("-pr",
                         "--passrandomize",
-                        help="if PSK is given in input, ap",
+                        help="if PSK is given in input, apply entropy to it",
                         default=False,
                         action="store_true")
     psksubparser.add_argument("-e",
