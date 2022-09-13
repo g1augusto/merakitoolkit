@@ -1,5 +1,6 @@
 # MerakiToolKit
 [![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/g1augusto/merakitoolkit)
+[![Build Status](https://app.travis-ci.com/g1augusto/merakitoolkit.svg?branch=master)](https://app.travis-ci.com/g1augusto/merakitoolkit)
 <br>
 
 MerakiToolKit is a Python application to automate specific tasks with Meraki Cloud networks.<br>
