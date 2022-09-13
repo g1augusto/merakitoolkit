@@ -11,8 +11,8 @@ import os
 from importlib import resources
 
 # additional libraries
-import merakitoolkit.merakitoolkitparser as merakitoolkitparser # pylint: disable=import-error
-import merakitoolkit.merakitoolkit as merakitoolkit
+from merakitoolkit import merakitoolkitparser
+from merakitoolkit import merakitoolkit
 
 
 def main() -> int:
