@@ -8,12 +8,9 @@ before_script:
 - python -m pylint merakitoolkit/
 script:
 - python -m pytest tests/ -v -s
-deploy:
-  provider: pypi
-  username: __token__
-  password:
-    secure: rJ092AnSdZEY+MQ/CEQlTXjvZFgt7jVB1rvGq7RLsFi9NC69wrO+PF/dC8yOoDvEaRgKTqkrr+dHjZogrlpgzvRypAft512Hny0ZWqOCXs+JO9pIpr3lescGuOOQqnNHkgA76K6GJlVriJ0b7C7xWsvNzQikOOTDHdG3I7L0gkhpfMGk4faJAzGW4hxY0t9pQ9hsedO3+F+UicX73xE6Tt2+ldj0lsJ/VeBu1VUqb7IdUrP+Nie4v9L4hXZZfVjQvD1GRkmeCN0YP1/d7rsscoSh2yYnnKKlZG+EvWDxRXkUeWYvg42qpEcw3f5bBL4wP/ju+G2Rc0EH6fOeCkfB3pvGVVTBOzt+HR03y5g1ggkCCV0cqiLMqMtwPShou2df+qEfnzdNDCOG3bOBoD2Z2b2uxoXjMHTlyq3zMDAo6fRkzxspoio4YEXZcnVMlu49ouucqVgxx3waG3Y50CCwa+vcOMh5HPEmNdn0JaVKz+OXOmIRDLdkVVPEXRnBicQc8etguHX2FoxW89yaN4gwjGMDToel5cpgr08yEEtJ36FbJc9BX0VtWStZZRMxMI/zEs3Hq1fhl/dUQ5F1O57gnQV8rxk9JIt50wz1JwqhyQihiqW1L1rTezfpzNsFSjGvlZ6B1rjh5OgImVL+ZtSlyI/kv8b7XUZN+Hxe7WTqrQM=
-  on:
-    branch: master
-  distributions: "sdist bdist_wheel"
-  skip_existing: true
+after_script:
+- python -m build
+- twine upload -u __token__ -p $PASSWORD --non-interactive dist/*
+env:
+  global:
+    secure: GzHqX2cyi00QYahgwjZsyxCqKGuEvDN+VtafsEjpBtx/xbshIkXGBCSJYpdItFfvy2hwA7rdL7jfhzafzmlDyEYHnEBttA3CQU9l0SeurYCrPmBI+XEGC9W06t0loKuvtr8OOJwwjm4QkFx74168/dXYjPqYUGJhsFnff4O04lWSwYrJdJTHqEXEkGxlox4agZqzfmIzN2DfffOtgxFQdEdoY1eJDZTohPKTXS25u52iRvSPdQWY3CfyGvZDIxCJS5mHmfAzghPpPRld9cE0lwt/DEGXwyKPs7PinHqVerfgiAgDl4DHwlA1A1BJ1EVjYVJnjJxqsOKlklckcjX9vcj2WD62G264vkMx0KiYmjCY2TDRR4shlw2+LBeacI7q9BXE+zOTwGy+s0uBy/l/dXpcKd7mxMnRQIKj3qZ3ThUbJZnHyaY4o5w0+mCR/69/NZ2zt5rnetdcoLl+Z2LOdJPD62gBVfnAST8hxPtkA7olF1Ao+9t34S0AtN7DixGWq1UyrheM+p0WpGzY+f2Iz8o2Mcn3qPqpL5wsvLBqsSpKY7+GJre57FaqT2/2jl/I4xUX4qkBPet9tmWIwYMwVkcxZv5FI/0d/zNqNbrEKncDx3CNxM2RJUPOAoiadjtvcKx4fKbBAMWhdAQO6gA5vOwGAi+7SmDGOpNupzbUZmQ=
