@@ -15,7 +15,8 @@ deploy:
   provider: script
   script: bash deploy.sh
   skip_cleanup: true
-
+  on:
+    tags: release
 env:
   global:
     secure: GzHqX2cyi00QYahgwjZsyxCqKGuEvDN+VtafsEjpBtx/xbshIkXGBCSJYpdItFfvy2hwA7rdL7jfhzafzmlDyEYHnEBttA3CQU9l0SeurYCrPmBI+XEGC9W06t0loKuvtr8OOJwwjm4QkFx74168/dXYjPqYUGJhsFnff4O04lWSwYrJdJTHqEXEkGxlox4agZqzfmIzN2DfffOtgxFQdEdoY1eJDZTohPKTXS25u52iRvSPdQWY3CfyGvZDIxCJS5mHmfAzghPpPRld9cE0lwt/DEGXwyKPs7PinHqVerfgiAgDl4DHwlA1A1BJ1EVjYVJnjJxqsOKlklckcjX9vcj2WD62G264vkMx0KiYmjCY2TDRR4shlw2+LBeacI7q9BXE+zOTwGy+s0uBy/l/dXpcKd7mxMnRQIKj3qZ3ThUbJZnHyaY4o5w0+mCR/69/NZ2zt5rnetdcoLl+Z2LOdJPD62gBVfnAST8hxPtkA7olF1Ao+9t34S0AtN7DixGWq1UyrheM+p0WpGzY+f2Iz8o2Mcn3qPqpL5wsvLBqsSpKY7+GJre57FaqT2/2jl/I4xUX4qkBPet9tmWIwYMwVkcxZv5FI/0d/zNqNbrEKncDx3CNxM2RJUPOAoiadjtvcKx4fKbBAMWhdAQO6gA5vOwGAi+7SmDGOpNupzbUZmQ=
