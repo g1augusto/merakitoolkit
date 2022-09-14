@@ -1,8 +1,17 @@
-os: linux
-dist: focal
 language: python
-python:
-  - '3.8'
+jobs:
+  include:
+    - name: "Linux Python 3.8"
+      python: 3.8
+      os: "Linux"
+      dist: focal
+    - name: "Linux Python 3.10 "
+      python: 3.10
+      os: "Linux"
+      dist: focal
+    - name: "Windows Python 3.8"
+      os: "windows"
+      python: 3.8
 # installation script
 # after installing python dev libraries create a shell script for deployment to pypi
 # using an encrypted token password generated with travis cli
@@ -20,7 +29,7 @@ script:
 # deploy to pypi without the standard provider (that requires still setup.py)
 # use instead the shell script created in the installation phase
 # to execute it is necessary that cleanup is skipped as it removes all local files 
-# deployment happens on a specific git tag "release" that is set into github
+# deployment happens on a specific git tag "release" that is set into github on master branch
 # Travis CI environment retrieve the commit tag and stores it into $TRAVIS_TAG
 # $TRAVIS_TAG is then used to match only commits that are tagged with "release"
 deploy:
@@ -28,6 +37,7 @@ deploy:
   script: bash deploy.sh
   skip_cleanup: true
   on:
+    branch: master
     tags: true
     condition: "$TRAVIS_TAG == release"
 env:
