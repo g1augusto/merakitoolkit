@@ -5,8 +5,8 @@ python:
 install:
   - pip install -r requirements-dev.txt
   - echo "#!/bin/bash" >> deploy.sh
-  - echo "python -m build || true" >> deploy.sh
-  - echo "twine upload -u __token__ -p $PASSWORD --non-interactive dist/*" >> deploy.sh
+  - echo "python -m build" >> deploy.sh
+  - echo "twine upload -u __token__ -p $PASSWORD --non-interactive dist/* || true" >> deploy.sh
 before_script:
   - python -m pylint merakitoolkit/
 script:
