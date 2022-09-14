@@ -20,9 +20,9 @@ script:
 # deploy to pypi without the standard provider (that requires still setup.py)
 # use instead the shell script created in the installation phase
 # to execute it is necessary that cleanup is skipped as it removes all local files 
-# deployment happens on a specific git tag "release" that is set into 
-# Travis CI environment variables for this repository (settings->environment variables)
-# on.tags: true only specify to use that tag value set on $TRAVIS_TAG
+# deployment happens on a specific git tag "release" that is set into github
+# Travis CI environment retrieve the commit tag and stores it into $TRAVIS_TAG
+# $TRAVIS_TAG is then used to match only commits that are tagged with "release"
 deploy:
   provider: script
   script: bash deploy.sh
