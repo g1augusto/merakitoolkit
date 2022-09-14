@@ -3,15 +3,26 @@ dist: focal
 language: python
 python:
   - '3.8'
+# installation script
+# after installing python dev libraries create a shell script for deployment to pypi
+# using an encrypted token password generated with travis cli
 install:
   - pip install -r requirements-dev.txt
   - echo "#!/bin/bash" >> deploy.sh
   - echo "python -m build" >> deploy.sh
   - echo "twine upload -u __token__ -p $PASSWORD --non-interactive dist/* || true" >> deploy.sh
+# Linting the code, exception to pylint are written into pyproject.toml
 before_script:
   - python -m pylint merakitoolkit/
+# run pytest tests from tests folder
 script:
   - python -m pytest tests/ -v -s
+# deploy to pypi without the standard provider (that requires still setup.py)
+# use instead the shell script created in the installation phase
+# to execute it is necessary that cleanup is skipped as it removes all local files 
+# deployment happens on a specific git tag "release" that is set into 
+# Travis CI environment variables for this repository (settings->environment variables)
+# on.tags: true only specify to use that tag value set on $TRAVIS_TAG
 deploy:
   provider: script
   script: bash deploy.sh
