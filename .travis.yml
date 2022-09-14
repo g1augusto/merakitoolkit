@@ -1,13 +1,16 @@
+# this sets the default setting for all jobs (unless modified)
 language: python
+dist: focal
+os: linux
 jobs:
   include:
     - name: "Linux Python 3.8"
       python: 3.8
-      os: "Linux"
+      os: "linux"
       dist: focal
     - name: "Linux Python 3.10 "
       python: 3.10
-      os: "Linux"
+      os: "linux"
       dist: focal
     - name: "Windows Python 3.8"
       os: "windows"
@@ -39,7 +42,7 @@ script:
 deploy:
   provider: script
   script: bash deploy.sh
-  skip_cleanup: true
+  cleanup: false
   on:
     branch: master
     tags: true
