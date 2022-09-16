@@ -24,6 +24,7 @@ jobs:
 # using an encrypted token password generated with travis cli
 install:
   - pip install -r requirements-dev.txt
+  - pip install pytest-cov
   - echo "#!/bin/bash" >> deploy.sh
   - echo "python -m build" >> deploy.sh
   - echo "twine upload -u __token__ -p $PASSWORD --non-interactive dist/* || true" >> deploy.sh
