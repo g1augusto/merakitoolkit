@@ -39,6 +39,11 @@ script:
 # deployment happens on a specific git tag "release" that is set into github on master branch
 # Travis CI environment retrieve the commit tag and stores it into $TRAVIS_TAG
 # $TRAVIS_TAG is then used to match only commits that are tagged with "release"
+after_success:
+  # Add codecov test coverage
+  - curl -Os https://uploader.codecov.io/latest/linux/codecov
+  - chmod +x codecov
+  - ./codecov
 deploy:
   provider: script
   script: bash deploy.sh
