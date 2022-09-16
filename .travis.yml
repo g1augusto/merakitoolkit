@@ -20,8 +20,7 @@ jobs:
         - python -m pip install --upgrade pip
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
       after_success:
-        - $ProgressPreference = 'SilentlyContinue'
-        - Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile codecov.exe
+        - curl -Os https://uploader.codecov.io/latest/windows/codecov.exe
         - .\codecov.exe
 # installation script
 # after installing python dev libraries create a shell script for deployment to pypi
