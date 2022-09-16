@@ -33,7 +33,7 @@ before_script:
   - python -m pylint merakitoolkit/
 # run pytest tests from tests folder
 script:
-  - python -m pytest tests/ -v -s
+  - python -m pytest --cov tests/ -v -s
 # deploy to pypi without the standard provider (that requires still setup.py)
 # use instead the shell script created in the installation phase
 # to execute it is necessary that cleanup is skipped as it removes all local files 
