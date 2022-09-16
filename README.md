@@ -1,6 +1,8 @@
 # MerakiToolKit
 [![published](https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg)](https://developer.cisco.com/codeexchange/github/repo/g1augusto/merakitoolkit)
 [![Build Status](https://app.travis-ci.com/g1augusto/merakitoolkit.svg?branch=master)](https://app.travis-ci.com/g1augusto/merakitoolkit)
+[![codecov](https://codecov.io/gh/g1augusto/merakitoolkit/branch/master/graph/badge.svg?token=UBGXTN4H76)](https://codecov.io/gh/g1augusto/merakitoolkit)
+<br>
 <br>
 
 MerakiToolKit is a Python application to automate specific tasks with Meraki Cloud networks.<br>
@@ -13,13 +15,15 @@ Currently supported operations are
     - email based on jinja2 template
     - attach any image in the template folder selected
     - generate a QR code to attach to the email template
-
+<br>
 <br>
 
 ## Changelog (major changes)
 - 02/09/2022 - 1.0.3 - Stable synchronous release
 - 10/09/2022 - 1.1.0 - Stable Asynchronous release
 - 11/09/2022 - 1.1.3 - Stable Asynchronous release (Linux and Windows)
+<br>
+<br>
 
 ## Installation
 ------------------------------------------
@@ -32,6 +36,7 @@ Alternatively is possible to clone the git repository hosted on GitHub and insta
 ```
 git clone https://github.com/g1augusto/merakitoolkit.git
 ```
+<br>
 <br>
 
 ## Usage
@@ -109,6 +114,8 @@ required arguments:
   -s SSID, --ssid SSID  Specify an SSID
 
 ```
+<br>
+<br>
 
 ## Examples
 ```
@@ -138,7 +145,7 @@ merakitoolkit psk \
 ```
 <br>
 
-Is always reccommended to perform a first test with **--dryrun** and evaluate if the projected outcome reflects the desired outcome
+Is always reccommended to perform a first test with **--dryrun** and evaluate if the simulated outcome reflects the desired outcome
 
 ## Using environment variables
 ------------------------------------------
