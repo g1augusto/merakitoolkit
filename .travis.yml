@@ -45,7 +45,7 @@ script:
 # Travis CI environment retrieve the commit tag and stores it into $TRAVIS_TAG
 # $TRAVIS_TAG is then used to match only commits that are tagged with "release"
 after_success:
-  # Add codecov test coverage
+  # Add codecov test coverage (using TravisCI with public repo needs no KEY)
   - curl -Os https://uploader.codecov.io/latest/linux/codecov
   - chmod +x codecov
   - ./codecov
